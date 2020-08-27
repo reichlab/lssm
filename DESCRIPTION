@@ -1,0 +1,20 @@
+Package: lssm
+Title: Linear state space models
+Version: 0.0.0.9000
+Authors@R: c(
+    person(given = "Evan",
+           family = "Ray",
+           role = c("aut", "cre"),
+           email = "elray@umass.edu"),
+    person(given = "Serena",
+          family = "Wang",
+          role = c("aut"),
+          email = "wang225y@mtholyoke.edu"))
+Description: Estimating and forecasting from linear state space models
+License: BSD3
+Imports:
+  dplyr, tibble, tidyr, purrr, magrittr, car
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.1
