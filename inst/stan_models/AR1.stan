@@ -1,6 +1,5 @@
 #include functions.stan
 
-// parameter estimation/fitting
 data {
   // number of observations
   int<lower=0> n;

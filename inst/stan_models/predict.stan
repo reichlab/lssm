@@ -1,11 +1,5 @@
-// +# steps to predict in data
-//
-// no model block
-// paramters --> new data block 
-// transformed param --> trans data
-// generated +matrix vars to get result of predict()
-
 #include functions.stan
+
 data {
   // number of observations
   int<lower=0> n;
@@ -53,7 +47,6 @@ transformed data{
 
 
 parameters {
-  // dummy parameters
   
 }
 
