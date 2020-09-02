@@ -21,16 +21,22 @@
 #' @export
 predict.lssm <- function(
   lssm_fit,
+  forecast_representation,
+  quantile_levels = c(0.025, 0.25, 0.5, 0.75, 0.975),
   nsim = 1,
   seed = NULL,
   newdata,
   horizon = 1,
   ...
 ) {
-  if(is.null(seed)) {
+  if (is.null(seed)) {
     seed <- .Random.seed
   } else {
     set.seed(seed)
+  }
+
+  if (missing(newdata)) {
+    newdata <- attr(lssm_fit, "lssm_y")
   }
 
   transformation <- attr(lssm_fit, "lssm_transformation")

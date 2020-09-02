@@ -1,7 +1,15 @@
+library(lssm)
+
 # simulated data
 #phi_1 = 0.8
 fake_data <-arima.sim(n = 200, model = list(ar = 0.8))
-ts.plot(fake_data, main = "Time Series Plot of Our Fake Data")
+#ts.plot(fake_data, main = "Time Series Plot of Our Fake Data")
+
+
+arma_fit <- fit_lssm(y = fake_data, model = "arma", transformation = "none", verbose = FALSE)
+
+forecasts <- predict(arma_fit, horizon = 1, forecast_representation = "sample")
+forecasts <- predict(arma_fit, horizon = 1, forecast_representation = "quantile")
 
 library(rstan)
 rstan_options(auto_write = TRUE)

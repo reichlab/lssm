@@ -19,7 +19,7 @@
 #' @param D integer order of seasonal differencing; default is 0
 #' @param ... arguments passed on to model-specific fit method
 #'
-#' @return a simple_ts model fit
+#' @return a lssm model fit
 #'
 #' @details This function is a wrapper around model-specific fit methods,
 #'   providing some preliminary transformations of the data.
@@ -36,6 +36,7 @@ fit_lssm <- function(
   transform_offset = 0.5,
   d = 0,
   D = 0,
+  verbose = FALSE,
   ...) {
   # Validate arguments
   if (!(is.numeric(y) || is.ts(y))) {
@@ -73,13 +74,13 @@ fit_lssm <- function(
 
   # Get fit
   if (model == "arma") {
-    lssm_fit <- fit_arma(y = differenced_y, ...)
+    lssm_fit <- fit_arma(y = differenced_y, verbose = verbose, ...)
   } else if(model == "spline_smoother") {
-    lssm_fit <- fit_spline_smoother(y = differenced_y, ...)
+    lssm_fit <- fit_spline_smoother(y = differenced_y, verbose = verbose, ...)
   }
 
   # Save information needed for prediction
-  attr(simple_ts_fit, "lssm_call") <- match.call()
+  attr(lssm_fit, "lssm_call") <- match.call()
   params_to_save <- c("y", "ts_frequency", "transformation", "transform_offset",
                       "d", "D")
   for (param_name in params_to_save) {

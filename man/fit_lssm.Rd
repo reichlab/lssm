@@ -12,6 +12,7 @@ fit_lssm(
   transform_offset = 0.5,
   d = 0,
   D = 0,
+  verbose = FALSE,
   ...
 )
 }
