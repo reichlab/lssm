@@ -1,5 +1,6 @@
 #include functions.stan
 
+// parameter estimation/fitting
 data {
   // number of observations
   int<lower=0> n;
@@ -7,17 +8,20 @@ data {
   int<lower=0> p;
   // n obs each is px1
   vector[p] y[n];
+  // number of lags
+  int<lower=0> p_ar;
   
 }
 
 transformed data{
   // number of states = p_ar
-  int<lower=0> m = 1;
+  int<lower=0> m = p_ar;
   
   // observation intercept
   vector[p] d = rep_vector(0, p);
   
-  matrix[p,m] Z = [[1]];
+  // Z in 3.19
+  matrix[p,m] Z = append_col([[1]],to_matrix(rep_row_vector(0, m-1)));
   
   // observation covariance
   matrix[p,p] H = [[0]];
@@ -26,12 +30,14 @@ transformed data{
   vector[m] c = rep_vector(0, m);
   
   // state covariance
-  matrix[m,1] R = [[1]];
+  matrix[m,1] R = append_row([[1]], to_matrix(rep_vector(0, m-1)));
   
 }
 
 parameters {
-  real phi_1;
+  
+  vector[p_ar] phi;
+  
   real <lower = 0> var_zeta;
   // expected value for the initial state
   vector[m] a1;
@@ -39,7 +45,10 @@ parameters {
 
 transformed parameters{
   
-  matrix[m,m] T = [[phi_1]];
+  // T in 3.20
+  matrix[m,m] T = append_col(phi,
+  append_row(
+    diag_matrix(rep_vector(1, m-1)), to_matrix(rep_row_vector(0, m-1))));
   
   matrix[1,1] Q = [[var_zeta]];
   
