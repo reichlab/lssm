@@ -74,3 +74,41 @@ dim(stan_data$a1) = 3
 
 prediction = optimizing(model, stan_data)
 
+# ARMA fit 
+fake_data_arma <- arima.sim(model = list(ar = c(.2, .5, .05), ma = .9 ), n = 200)
+model <- stan_model("inst/stan_models/ARMA.stan")
+stan_data <- list(
+  n = length(fake_data_arma),
+  p = 1,
+  y = array(data=fake_data_arma, dim = c(200,1)),
+  p_ar = 3,
+  q_ma = 1
+)
+
+estimate_arma <- optimizing(model, stan_data)
+
+# ARMA predict 
+model <- stan_model("inst/stan_models/ARMA_predict.stan")
+
+stan_data <- list(
+  n = length(fake_data_arma),
+  p = 1,
+  y = array(data=fake_data_arma, dim = c(200,1)),
+  steps_ahead = 1,
+  p_ar = 3,
+  q_ma = 1,
+  # r = max(p_ar, q_ma+1)
+  r = 3,
+  # m = r
+  m = 3,
+  phi = c(estimate_arma$par["phi[1]"],estimate_arma$par["phi[2]"],estimate_arma$par["phi[3]"]),
+  theta = estimate_arma$par["theta[1]"],
+  var_zeta =  estimate_arma$par["var_zeta"],
+  a1 = c(estimate_arma$par["a1[1]"],estimate_arma$par["a1[2]"],estimate_arma$par["a1[3]"] )
+)
+dim(stan_data$a1) = 3
+dim(stan_data$phi) = 3
+dim(stan_data$theta) = 1
+
+prediction = optimizing(model, stan_data)
+
