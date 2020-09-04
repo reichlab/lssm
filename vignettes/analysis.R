@@ -1,15 +1,54 @@
 library(lssm)
+library(ggplot2)
 
 # simulated data
 #phi_1 = 0.8
-fake_data <-arima.sim(n = 200, model = list(ar = 0.8))
+fake_data <- arima.sim(n = 200, model = list(ar = 0.8))
 #ts.plot(fake_data, main = "Time Series Plot of Our Fake Data")
 
 
-arma_fit <- fit_lssm(y = fake_data, model = "arma", transformation = "none", verbose = FALSE)
+arma_fit <- fit_lssm(
+  y = fake_data,
+  model = "arma",
+  transformation = "none",
+  verbose = FALSE)
 
-forecasts <- predict(arma_fit, horizon = 1, forecast_representation = "sample")
-forecasts <- predict(arma_fit, horizon = 1, forecast_representation = "quantile")
+forecasts <- predict(
+  arma_fit,
+  horizon = 1,
+  forecast_representation = "sample")
+forecasts <- predict(
+  arma_fit,
+  horizon = 1,
+  forecast_representation = "quantile")
+
+plot_data <- data.frame(
+  t = seq_len(200),
+  y = as.vector(fake_data)
+)
+
+ggplot() +
+  geom_line(data = plot_data, mapping = aes(x = t, y = y)) +
+  geom_point(
+    data = data.frame(t = 201, y = forecasts[1, 3]),
+    mapping = aes(x = t, y = y),
+    color = "purple"
+  ) +
+  geom_errorbar(
+    data = data.frame(t = 201, ymin = forecasts[1, 2], ymax = forecasts[1, 4]),
+    mapping = aes(x = t, ymin = ymin, ymax = ymax),
+    color = "purple",
+    width = 2
+  ) +
+  geom_errorbar(
+    data = data.frame(t = 201, ymin = forecasts[1, 1], ymax = forecasts[1, 5]),
+    mapping = aes(x = t, ymin = ymin, ymax = ymax),
+    color = "purple",
+    width = 3
+  ) +
+  theme_bw()
+
+
 
 library(rstan)
 rstan_options(auto_write = TRUE)
