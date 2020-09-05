@@ -42,7 +42,7 @@ least -0.5, so that they round up to non-negative values.}
 \item{...}{arguments passed on to model-specific fit method}
 }
 \value{
-a simple_ts model fit
+a lssm model fit
 }
 \description{
 Estimate a linear state space model

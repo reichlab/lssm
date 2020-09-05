@@ -1,0 +1,1242 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>arma</title>
+
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css" data-origin="pandoc">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+<link href="data:text/css;charset=utf-8,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" rel="stylesheet" type="text/css" />
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">arma</h1>
+
+
+
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(lssm)
+<span class="kw">library</span>(purrr)
+<span class="kw">library</span>(dplyr)
+<span class="kw">library</span>(ggplot2)
+<span class="kw">library</span>(gridExtra)
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Attaching package: 'gridExtra'</span>
+<span class="co">#&gt; The following object is masked from 'package:dplyr':</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt;     combine</span></code></pre></div>
+<p>We illustrate with an AR(1) model.</p>
+<div id="simulated-data" class="section level1">
+<h1>Simulated Data</h1>
+<div id="illustration-of-estimation-and-1-step-ahead-prediction-intervals." class="section level2">
+<h2>Illustration of estimation and 1 step ahead prediction intervals.</h2>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">y &lt;-<span class="st"> </span><span class="kw">arima.sim</span>(<span class="dt">model =</span> <span class="kw">list</span>(<span class="dt">ar =</span> <span class="kw">c</span>(.<span class="dv">2</span>, <span class="fl">.5</span>, <span class="fl">.05</span>), <span class="dt">ma =</span> <span class="fl">.9</span>), <span class="dt">n =</span> <span class="dv">200</span>)
+
+arma_fit &lt;-<span class="st"> </span><span class="kw">fit_lssm</span>(
+  <span class="dt">y =</span> y,
+  <span class="dt">model =</span> <span class="st">&quot;arma&quot;</span>,
+  <span class="dt">transformation =</span> <span class="st">&quot;none&quot;</span>,
+  <span class="dt">p_ar =</span> <span class="dv">3</span>,
+  <span class="dt">q_ma =</span> <span class="dv">1</span>,
+  <span class="dt">verbose =</span> <span class="ot">FALSE</span>)
+
+forecasts &lt;-<span class="st"> </span><span class="kw">predict</span>(
+  arma_fit,
+  <span class="dt">horizon =</span> <span class="dv">1</span>,
+  <span class="dt">forecast_representation =</span> <span class="st">&quot;quantile&quot;</span>,
+  <span class="dt">quantile_levels =</span> <span class="kw">c</span>(<span class="fl">0.025</span>, <span class="fl">0.25</span>, <span class="fl">0.5</span>, <span class="fl">0.75</span>, <span class="fl">0.975</span>))
+<span class="co">#&gt; </span>
+<span class="co">#&gt; SAMPLING FOR MODEL 'ARMA_predict' NOW (CHAIN 1).</span>
+<span class="co">#&gt; Chain 1: Iteration: 1 / 1 [100%]  (Sampling)</span>
+<span class="co">#&gt; Chain 1: </span>
+<span class="co">#&gt; Chain 1:  Elapsed Time: 0 seconds (Warm-up)</span>
+<span class="co">#&gt; Chain 1:                0.000942 seconds (Sampling)</span>
+<span class="co">#&gt; Chain 1:                0.000942 seconds (Total)</span>
+<span class="co">#&gt; Chain 1:</span>
+
+plot_data &lt;-<span class="st"> </span><span class="kw">data.frame</span>(
+  <span class="dt">t =</span> <span class="kw">seq_len</span>(<span class="dv">200</span>),
+  <span class="dt">y =</span> <span class="kw">as.vector</span>(y)
+)
+
+<span class="kw">ggplot</span>() <span class="op">+</span>
+<span class="st">  </span><span class="kw">geom_line</span>(<span class="dt">data =</span> plot_data, <span class="dt">mapping =</span> <span class="kw">aes</span>(<span class="dt">x =</span> t, <span class="dt">y =</span> y)) <span class="op">+</span>
+<span class="st">  </span><span class="kw">geom_errorbar</span>(
+    <span class="dt">data =</span> <span class="kw">data.frame</span>(<span class="dt">t =</span> <span class="dv">201</span>, <span class="dt">ymin =</span> forecasts[<span class="dv">1</span>, <span class="dv">1</span>], <span class="dt">ymax =</span> forecasts[<span class="dv">1</span>, <span class="dv">5</span>]),
+    <span class="dt">mapping =</span> <span class="kw">aes</span>(<span class="dt">x =</span> t, <span class="dt">ymin =</span> ymin, <span class="dt">ymax =</span> ymax),
+    <span class="dt">color =</span> <span class="st">&quot;cornflowerblue&quot;</span>,
+    <span class="dt">width =</span> <span class="dv">3</span>
+  ) <span class="op">+</span>
+<span class="st">  </span><span class="kw">geom_errorbar</span>(
+    <span class="dt">data =</span> <span class="kw">data.frame</span>(<span class="dt">t =</span> <span class="dv">201</span>, <span class="dt">ymin =</span> forecasts[<span class="dv">1</span>, <span class="dv">2</span>], <span class="dt">ymax =</span> forecasts[<span class="dv">1</span>, <span class="dv">4</span>]),
+    <span class="dt">mapping =</span> <span class="kw">aes</span>(<span class="dt">x =</span> t, <span class="dt">ymin =</span> ymin, <span class="dt">ymax =</span> ymax),
+    <span class="dt">color =</span> <span class="st">&quot;orange&quot;</span>,
+    <span class="dt">width =</span> <span class="dv">2</span>
+  ) <span class="op">+</span>
+<span class="st">  </span><span class="kw">geom_point</span>(
+    <span class="dt">data =</span> <span class="kw">data.frame</span>(<span class="dt">t =</span> <span class="dv">201</span>, <span class="dt">y =</span> forecasts[<span class="dv">1</span>, <span class="dv">3</span>]),
+    <span class="dt">mapping =</span> <span class="kw">aes</span>(<span class="dt">x =</span> t, <span class="dt">y =</span> y)
+  ) <span class="op">+</span>
+<span class="st">  </span><span class="kw">theme_bw</span>()</code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+</div>
+<div id="sampling-distributions-of-estimators" class="section level2">
+<h2>Sampling distributions of estimators</h2>
+<p>We estimate from many simulated data sets.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">set.seed</span>(<span class="dv">84773</span>)
+n_replicates &lt;-<span class="st"> </span><span class="dv">1000</span>
+
+estimates &lt;-<span class="st"> </span>purrr<span class="op">::</span><span class="kw">map_dfr</span>(
+  <span class="kw">seq_len</span>(n_replicates),
+  <span class="cf">function</span>(i) {
+    <span class="kw">print</span>(<span class="kw">paste0</span>(<span class="st">&quot;replicate number &quot;</span>, i))
+    y &lt;-<span class="st"> </span><span class="kw">arima.sim</span>(<span class="dt">model =</span> <span class="kw">list</span>(<span class="dt">ar =</span> <span class="kw">c</span>(.<span class="dv">2</span>, <span class="fl">.5</span>, <span class="fl">.05</span>), <span class="dt">ma =</span> <span class="fl">.9</span> ), <span class="dt">n =</span> <span class="dv">200</span>)
+
+    arma_fit &lt;-<span class="st"> </span><span class="kw">fit_lssm</span>(
+      <span class="dt">y =</span> y,
+      <span class="dt">model =</span> <span class="st">&quot;arma&quot;</span>,
+      <span class="dt">transformation =</span> <span class="st">&quot;none&quot;</span>,
+      <span class="dt">p_ar =</span> <span class="dv">3</span>,
+      <span class="dt">q_ma =</span> <span class="dv">1</span>,
+      <span class="dt">verbose =</span> <span class="ot">FALSE</span>)
+
+    arma_fit<span class="op">$</span>param_estimates <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">as.list</span>() <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">as.data.frame</span>()
+  }
+)
+<span class="co">#&gt; [1] &quot;replicate number 1&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 2&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 3&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 4&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 5&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 6&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 7&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 8&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 9&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 10&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 11&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 12&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 13&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 14&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 15&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 16&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 17&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 18&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 19&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 20&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 21&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 22&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 23&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 24&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 25&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 26&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 27&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 28&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 29&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 30&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 31&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 32&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 33&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 34&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 35&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 36&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 37&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 38&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 39&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 40&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 41&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 42&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 43&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 44&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 45&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 46&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 47&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 48&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 49&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 50&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 51&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 52&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 53&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 54&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 55&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 56&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 57&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 58&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 59&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 60&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 61&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 62&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 63&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 64&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 65&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 66&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 67&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 68&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 69&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 70&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 71&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 72&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 73&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 74&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 75&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 76&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 77&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 78&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 79&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 80&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 81&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 82&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 83&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 84&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 85&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 86&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 87&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 88&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 89&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 90&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 91&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 92&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 93&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 94&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 95&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 96&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 97&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 98&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 99&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 100&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 101&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 102&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 103&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 104&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 105&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 106&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 107&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 108&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 109&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 110&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 111&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 112&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 113&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 114&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 115&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 116&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 117&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 118&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 119&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 120&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 121&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 122&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 123&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 124&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 125&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 126&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 127&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 128&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 129&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 130&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 131&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 132&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 133&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 134&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 135&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 136&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 137&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 138&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 139&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 140&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 141&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 142&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 143&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 144&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 145&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 146&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 147&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 148&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 149&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 150&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 151&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 152&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 153&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 154&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 155&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 156&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 157&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 158&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 159&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 160&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 161&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 162&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 163&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 164&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 165&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 166&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 167&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 168&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 169&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 170&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 171&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 172&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 173&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 174&quot;</span>
+<span class="co">#&gt; Warning in .local(object, ...): non-zero return code in optimizing</span>
+<span class="co">#&gt; [1] &quot;replicate number 175&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 176&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 177&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 178&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 179&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 180&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 181&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 182&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 183&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 184&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 185&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 186&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 187&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 188&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 189&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 190&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 191&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 192&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 193&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 194&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 195&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 196&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 197&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 198&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 199&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 200&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 201&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 202&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 203&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 204&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 205&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 206&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 207&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 208&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 209&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 210&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 211&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 212&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 213&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 214&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 215&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 216&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 217&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 218&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 219&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 220&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 221&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 222&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 223&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 224&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 225&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 226&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 227&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 228&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 229&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 230&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 231&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 232&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 233&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 234&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 235&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 236&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 237&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 238&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 239&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 240&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 241&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 242&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 243&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 244&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 245&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 246&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 247&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 248&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 249&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 250&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 251&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 252&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 253&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 254&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 255&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 256&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 257&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 258&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 259&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 260&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 261&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 262&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 263&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 264&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 265&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 266&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 267&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 268&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 269&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 270&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 271&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 272&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 273&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 274&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 275&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 276&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 277&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 278&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 279&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 280&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 281&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 282&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 283&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 284&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 285&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 286&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 287&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 288&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 289&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 290&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 291&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 292&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 293&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 294&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 295&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 296&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 297&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 298&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 299&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 300&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 301&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 302&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 303&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 304&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 305&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 306&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 307&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 308&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 309&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 310&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 311&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 312&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 313&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 314&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 315&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 316&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 317&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 318&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 319&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 320&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 321&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 322&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 323&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 324&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 325&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 326&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 327&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 328&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 329&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 330&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 331&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 332&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 333&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 334&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 335&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 336&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 337&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 338&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 339&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 340&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 341&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 342&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 343&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 344&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 345&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 346&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 347&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 348&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 349&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 350&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 351&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 352&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 353&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 354&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 355&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 356&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 357&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 358&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 359&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 360&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 361&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 362&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 363&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 364&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 365&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 366&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 367&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 368&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 369&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 370&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 371&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 372&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 373&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 374&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 375&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 376&quot;</span>
+<span class="co">#&gt; Warning in .local(object, ...): non-zero return code in optimizing</span>
+<span class="co">#&gt; [1] &quot;replicate number 377&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 378&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 379&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 380&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 381&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 382&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 383&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 384&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 385&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 386&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 387&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 388&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 389&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 390&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 391&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 392&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 393&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 394&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 395&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 396&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 397&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 398&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 399&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 400&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 401&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 402&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 403&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 404&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 405&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 406&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 407&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 408&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 409&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 410&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 411&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 412&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 413&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 414&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 415&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 416&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 417&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 418&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 419&quot;</span>
+<span class="co">#&gt; Warning in .local(object, ...): non-zero return code in optimizing</span>
+<span class="co">#&gt; [1] &quot;replicate number 420&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 421&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 422&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 423&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 424&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 425&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 426&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 427&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 428&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 429&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 430&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 431&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 432&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 433&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 434&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 435&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 436&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 437&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 438&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 439&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 440&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 441&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 442&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 443&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 444&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 445&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 446&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 447&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 448&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 449&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 450&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 451&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 452&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 453&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 454&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 455&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 456&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 457&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 458&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 459&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 460&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 461&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 462&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 463&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 464&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 465&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 466&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 467&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 468&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 469&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 470&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 471&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 472&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 473&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 474&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 475&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 476&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 477&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 478&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 479&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 480&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 481&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 482&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 483&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 484&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 485&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 486&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 487&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 488&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 489&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 490&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 491&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 492&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 493&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 494&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 495&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 496&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 497&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 498&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 499&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 500&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 501&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 502&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 503&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 504&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 505&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 506&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 507&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 508&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 509&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 510&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 511&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 512&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 513&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 514&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 515&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 516&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 517&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 518&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 519&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 520&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 521&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 522&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 523&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 524&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 525&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 526&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 527&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 528&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 529&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 530&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 531&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 532&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 533&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 534&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 535&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 536&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 537&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 538&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 539&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 540&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 541&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 542&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 543&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 544&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 545&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 546&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 547&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 548&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 549&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 550&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 551&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 552&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 553&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 554&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 555&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 556&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 557&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 558&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 559&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 560&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 561&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 562&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 563&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 564&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 565&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 566&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 567&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 568&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 569&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 570&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 571&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 572&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 573&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 574&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 575&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 576&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 577&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 578&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 579&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 580&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 581&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 582&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 583&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 584&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 585&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 586&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 587&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 588&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 589&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 590&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 591&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 592&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 593&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 594&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 595&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 596&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 597&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 598&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 599&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 600&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 601&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 602&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 603&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 604&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 605&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 606&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 607&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 608&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 609&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 610&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 611&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 612&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 613&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 614&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 615&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 616&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 617&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 618&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 619&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 620&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 621&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 622&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 623&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 624&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 625&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 626&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 627&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 628&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 629&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 630&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 631&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 632&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 633&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 634&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 635&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 636&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 637&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 638&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 639&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 640&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 641&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 642&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 643&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 644&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 645&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 646&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 647&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 648&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 649&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 650&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 651&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 652&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 653&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 654&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 655&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 656&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 657&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 658&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 659&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 660&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 661&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 662&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 663&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 664&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 665&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 666&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 667&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 668&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 669&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 670&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 671&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 672&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 673&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 674&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 675&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 676&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 677&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 678&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 679&quot;</span>
+<span class="co">#&gt; Warning in .local(object, ...): non-zero return code in optimizing</span>
+<span class="co">#&gt; [1] &quot;replicate number 680&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 681&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 682&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 683&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 684&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 685&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 686&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 687&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 688&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 689&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 690&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 691&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 692&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 693&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 694&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 695&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 696&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 697&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 698&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 699&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 700&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 701&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 702&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 703&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 704&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 705&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 706&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 707&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 708&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 709&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 710&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 711&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 712&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 713&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 714&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 715&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 716&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 717&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 718&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 719&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 720&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 721&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 722&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 723&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 724&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 725&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 726&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 727&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 728&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 729&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 730&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 731&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 732&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 733&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 734&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 735&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 736&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 737&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 738&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 739&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 740&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 741&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 742&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 743&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 744&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 745&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 746&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 747&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 748&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 749&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 750&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 751&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 752&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 753&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 754&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 755&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 756&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 757&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 758&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 759&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 760&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 761&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 762&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 763&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 764&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 765&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 766&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 767&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 768&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 769&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 770&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 771&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 772&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 773&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 774&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 775&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 776&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 777&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 778&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 779&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 780&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 781&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 782&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 783&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 784&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 785&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 786&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 787&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 788&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 789&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 790&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 791&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 792&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 793&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 794&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 795&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 796&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 797&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 798&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 799&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 800&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 801&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 802&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 803&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 804&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 805&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 806&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 807&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 808&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 809&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 810&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 811&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 812&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 813&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 814&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 815&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 816&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 817&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 818&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 819&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 820&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 821&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 822&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 823&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 824&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 825&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 826&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 827&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 828&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 829&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 830&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 831&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 832&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 833&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 834&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 835&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 836&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 837&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 838&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 839&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 840&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 841&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 842&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 843&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 844&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 845&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 846&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 847&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 848&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 849&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 850&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 851&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 852&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 853&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 854&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 855&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 856&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 857&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 858&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 859&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 860&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 861&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 862&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 863&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 864&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 865&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 866&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 867&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 868&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 869&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 870&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 871&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 872&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 873&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 874&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 875&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 876&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 877&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 878&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 879&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 880&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 881&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 882&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 883&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 884&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 885&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 886&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 887&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 888&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 889&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 890&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 891&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 892&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 893&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 894&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 895&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 896&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 897&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 898&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 899&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 900&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 901&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 902&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 903&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 904&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 905&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 906&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 907&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 908&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 909&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 910&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 911&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 912&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 913&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 914&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 915&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 916&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 917&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 918&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 919&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 920&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 921&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 922&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 923&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 924&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 925&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 926&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 927&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 928&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 929&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 930&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 931&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 932&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 933&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 934&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 935&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 936&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 937&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 938&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 939&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 940&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 941&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 942&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 943&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 944&quot;</span>
+<span class="co">#&gt; Warning in .local(object, ...): non-zero return code in optimizing</span>
+<span class="co">#&gt; [1] &quot;replicate number 945&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 946&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 947&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 948&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 949&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 950&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 951&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 952&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 953&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 954&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 955&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 956&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 957&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 958&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 959&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 960&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 961&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 962&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 963&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 964&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 965&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 966&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 967&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 968&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 969&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 970&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 971&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 972&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 973&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 974&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 975&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 976&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 977&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 978&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 979&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 980&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 981&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 982&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 983&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 984&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 985&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 986&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 987&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 988&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 989&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 990&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 991&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 992&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 993&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 994&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 995&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 996&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 997&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 998&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 999&quot;</span>
+<span class="co">#&gt; [1] &quot;replicate number 1000&quot;</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">estimates<span class="op">$</span>sd_zeta &lt;-<span class="st"> </span><span class="kw">sqrt</span>(estimates<span class="op">$</span>var_zeta)
+
+true_pars &lt;-<span class="st"> </span><span class="kw">list</span>(
+  <span class="st">&quot;phi.1.&quot;</span> =<span class="st"> </span><span class="fl">0.2</span>,
+  <span class="st">&quot;phi.2.&quot;</span> =<span class="st"> </span><span class="fl">0.5</span>,
+  <span class="st">&quot;phi.3.&quot;</span> =<span class="st"> </span><span class="fl">0.05</span>,
+  <span class="st">&quot;theta.1.&quot;</span> =<span class="st"> </span><span class="fl">0.9</span>,
+  <span class="st">&quot;var_zeta&quot;</span> =<span class="st"> </span><span class="fl">1.0</span>,
+  <span class="st">&quot;sd_zeta&quot;</span> =<span class="st"> </span><span class="fl">1.0</span>
+)
+
+plots &lt;-<span class="st"> </span>purrr<span class="op">::</span><span class="kw">map</span>(
+  <span class="kw">names</span>(true_pars),
+  <span class="cf">function</span>(par_name) {
+    <span class="kw">ggplot</span>() <span class="op">+</span>
+<span class="st">      </span><span class="kw">geom_histogram</span>(
+        <span class="dt">data =</span> estimates,
+        <span class="dt">mapping =</span> <span class="kw">aes_string</span>(<span class="dt">x =</span> par_name)
+      ) <span class="op">+</span>
+<span class="st">      </span><span class="kw">geom_vline</span>(<span class="dt">xintercept =</span> true_pars[[par_name]]) <span class="op">+</span>
+<span class="st">      </span><span class="kw">theme_bw</span>()
+  }
+)
+
+<span class="kw">grid.arrange</span>(<span class="dt">grobs =</span> plots)
+<span class="co">#&gt; `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span>
+<span class="co">#&gt; `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span>
+<span class="co">#&gt; `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span>
+<span class="co">#&gt; `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span>
+<span class="co">#&gt; `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span>
+<span class="co">#&gt; `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

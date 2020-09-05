@@ -4,7 +4,16 @@
 \alias{predict.lssm}
 \title{Generate predictions from a linear state space model fit}
 \usage{
-\method{predict}{lssm}(lssm_fit, nsim = 1, seed = NULL, newdata, horizon = 1, ...)
+\method{predict}{lssm}(
+  lssm_fit,
+  forecast_representation,
+  quantile_levels = c(0.025, 0.25, 0.5, 0.75, 0.975),
+  nsim = 1,
+  seed = NULL,
+  newdata,
+  horizon = 1,
+  ...
+)
 }
 \arguments{
 \item{nsim}{number of sample trajectories to simulate}

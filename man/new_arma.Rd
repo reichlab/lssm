@@ -4,12 +4,14 @@
 \alias{new_arma}
 \title{Create a arma object}
 \usage{
-new_arma(param_estimates)
+new_arma(param_estimates, p_ar, q_ma)
 }
 \arguments{
 \item{param_estimates}{model parameter estimates}
 
-\item{p}{autoregressive order}
+\item{p_ar}{integer order for autoregressive terms}
+
+\item{q_ma}{integer order of moving average terms}
 }
 \value{
 arma fit object

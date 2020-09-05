@@ -4,10 +4,14 @@
 \alias{fit_arma}
 \title{Fit a quantile baseline model to historical disease incidence}
 \usage{
-fit_arma(y, verbose = FALSE, ...)
+fit_arma(y, p_ar, q_ma, verbose = FALSE, ...)
 }
 \arguments{
 \item{y}{numeric vector of response values}
+
+\item{p_ar}{integer order for autoregressive terms}
+
+\item{q_ma}{integer order of moving average terms}
 
 \item{verbose}{logical: if TRUE, print output from estimation in Stan}
 

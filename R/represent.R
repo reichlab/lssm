@@ -1,4 +1,4 @@
-#' Standardize representation of forecast distributions
+#' Translate representation of forecast distributions to a standardized form
 #'
 #' @param named_dist_forecast data frame specifying the forecast, with at
 #' minimum a "family" column. Any columns occurring before the "family"
@@ -13,7 +13,17 @@
 #' @param nsim integer number of samples to use for
 #' forecast_representation = "sample"
 #'
-#' @return a (potentially nested) tibble representing the forecast.
+#' @return a representation of the forecast; the structure depends on
+#' `forecast_representation`:
+#' * "named_dist": the `named_dist_forecast` argument is returned
+#' * "sample": a matrix is returned with number of rows equal to the number of
+#' rows of `named_dist_forecast` and number of columns equal to `nsim`.
+#' Each row contains `nsims` samples from the predictive distribution in the
+#' corresponding row of `named_dist_forecast`.
+#' * "quantile": a matrix is returned with number of rows equal to the number
+#' of rows of `named_dist_forecast` and number of columns equal to the length
+#' of `quantile_levels`. Each row contains quantiles of the predictive
+#' distribution in the corresponding row of `named_dist_forecast`.
 #'
 #' @export
 represent_forecasts <- function(
@@ -35,14 +45,14 @@ represent_forecasts <- function(
       seq_len(ncol(named_dist_forecast) - family_col_ind)
     forecast <- matrix(
       NA_real_,
-      nrow = nsim,
-      ncol = nrow(named_dist_forecast))
-    rownames(forecast) <- paste0("sample_", seq_len(nsim))
+      nrow = nrow(named_dist_forecast),
+      ncol = nsim)
+    colnames(forecast) <- paste0("sample_", seq_len(nsim))
 
     for (h in seq_len(nrow(named_dist_forecast))) {
       call_args <- as.list(named_dist_forecast[h, param_cols])
       call_args$n <- nsim
-      forecast[, h] <- do.call(what = fun_name, args = call_args)
+      forecast[h, ] <- do.call(what = fun_name, args = call_args)
     }
   } else if (forecast_representation == "quantile") {
     fun_name <- paste0("q", named_dist_forecast$family[1])
@@ -51,14 +61,14 @@ represent_forecasts <- function(
       seq_len(ncol(named_dist_forecast) - family_col_ind)
     forecast <- matrix(
       NA_real_,
-      nrow = length(quantile_levels),
-      ncol = nrow(named_dist_forecast))
-    rownames(forecast) <- paste0("quantile_", seq_along(quantile_levels))
+      nrow = nrow(named_dist_forecast),
+      ncol = length(quantile_levels))
+    colnames(forecast) <- paste0("quantile_", quantile_levels)
 
     for (h in seq_len(nrow(named_dist_forecast))) {
       call_args <- as.list(named_dist_forecast[h, param_cols])
       call_args$p <- quantile_levels
-      forecast[, h] <- do.call(what = fun_name, args = call_args)
+      forecast[h, ] <- do.call(what = fun_name, args = call_args)
     }
   }
 

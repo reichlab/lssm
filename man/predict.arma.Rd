@@ -6,25 +6,23 @@
 \usage{
 \method{predict}{arma}(
   arma_fit,
-  post_pred,
+  newdata,
   horizon,
   forecast_representation,
-  p = c(0.025, 0.25, 0.5, 0.75, 0.975),
+  quantile_levels = c(0.025, 0.25, 0.5, 0.75, 0.975),
   nsim = 1e+05
 )
 }
 \arguments{
 \item{arma_fit}{an arma fit object}
 
-\item{post_pred}{logical; if TRUE, samples from the posterior predictive are
-returned for time points with observations in the training set}
-
 \item{horizon}{number of time steps forward to predict}
 
 \item{forecast_representation}{string specifying approach to representing
-forecast distributions, see documentation of represent_forecasts}
+forecast distributions. One of "named_dist", "sample", or "quantile";
+see documentation of \code{represent_forecasts} for more detail.}
 
-\item{p}{numeric vector of quantile levels to use for
+\item{quantile_levels}{numeric vector of quantile levels to use for
 forecast_representation = "quantile"}
 
 \item{nsim}{integer number of samples to use for
