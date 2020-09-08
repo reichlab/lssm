@@ -20,6 +20,7 @@ library(purrr)
 library(dplyr)
 library(ggplot2)
 library(gridExtra)
+library(caret)
 ```
 
 We illustrate with an AR(1) model.
@@ -125,3 +126,176 @@ plots <- purrr::map(
 
 grid.arrange(grobs = plots)
 ```
+
+
+# Using cross-validation via `caret` to select model
+
+```{r}
+y <- arima.sim(model = list(ar = c(.2, .5, .05), ma = .9), n = 200)
+
+y <- as.numeric(y)
+x <- matrix(y)
+colnames(x) <- "y"
+
+arma_fit <- train(
+  x = x,
+  y = y,
+  method = lssm_arma_caret,
+  verbose = FALSE,
+  metric = "log_score",
+  maximize = TRUE,
+  trControl = trainControl(
+    method = "timeslice",
+    number = 50, # number of folds for cross-validation
+    initialWindow = 150,
+    horizon = 1,
+    fixedWindow = FALSE,
+    returnResamp = "all", # return information from cross-validation
+    savePredictions = TRUE,
+    summaryFunction = log_score_summary
+  ),
+  tuneGrid = arma_param_grid(
+    x = y,
+    y = y,
+    transformation = "none",
+    transform_offset = 0.0,
+    max_d = 2,
+    max_D = 0,
+    max_p_ar = 4,
+    max_q_ma = 4,
+    min_order = 1,
+    max_order = 5
+  )
+)
+```
+
+```{r}
+arma_fit
+```
+
+```{r}
+xval_forecasts <- predict(
+  arma_fit$finalModel,
+  horizon = 1,
+  forecast_representation = "quantile",
+  quantile_levels = c(0.025, 0.25, 0.5, 0.75, 0.975))
+
+plot_data <- data.frame(
+  t = seq_len(200),
+  y = as.vector(y)
+)
+
+p_xval_fit <- ggplot() +
+  geom_line(data = plot_data, mapping = aes(x = t, y = y)) +
+  geom_errorbar(
+    data = data.frame(t = 201, ymin = xval_forecasts[1, 1], ymax = xval_forecasts[1, 5]),
+    mapping = aes(x = t, ymin = ymin, ymax = ymax),
+    color = "cornflowerblue",
+    width = 3
+  ) +
+  geom_errorbar(
+    data = data.frame(t = 201, ymin = xval_forecasts[1, 2], ymax = xval_forecasts[1, 4]),
+    mapping = aes(x = t, ymin = ymin, ymax = ymax),
+    color = "orange",
+    width = 2
+  ) +
+  geom_point(
+    data = data.frame(t = 201, y = xval_forecasts[1, 3]),
+    mapping = aes(x = t, y = y)
+  ) +
+  ggtitle("Forecast from model selected by cross-validation") +
+  theme_bw()
+
+
+```
+
+```{r}
+correct_arma_fit <- fit_lssm(
+  y = y,
+  ts_frequency = 1,
+  model = "arma",
+  transformation = "none",
+  p_ar = 3,
+  q_ma = 1,
+  verbose = FALSE)
+
+correct_forecasts <- predict(
+  correct_arma_fit,
+  horizon = 1,
+  forecast_representation = "quantile",
+  quantile_levels = c(0.025, 0.25, 0.5, 0.75, 0.975))
+
+p_correct_fit <- ggplot() +
+  geom_line(data = plot_data, mapping = aes(x = t, y = y)) +
+  geom_errorbar(
+    data = data.frame(t = 201, ymin = correct_forecasts[1, 1], ymax = correct_forecasts[1, 5]),
+    mapping = aes(x = t, ymin = ymin, ymax = ymax),
+    color = "cornflowerblue",
+    width = 3
+  ) +
+  geom_errorbar(
+    data = data.frame(t = 201, ymin = correct_forecasts[1, 2], ymax = correct_forecasts[1, 4]),
+    mapping = aes(x = t, ymin = ymin, ymax = ymax),
+    color = "orange",
+    width = 2
+  ) +
+  geom_point(
+    data = data.frame(t = 201, y = correct_forecasts[1, 3]),
+    mapping = aes(x = t, y = y)
+  ) +
+  ggtitle("Forecast from correctly specified model fit") +
+  theme_bw()
+
+```
+
+
+```{r}
+dgp <- correct_arma_fit
+dgp$param_estimates[["phi[1]"]] <- .2
+dgp$param_estimates[["phi[2]"]] <- .5
+dgp$param_estimates[["phi[3]"]] <- .05
+dgp$param_estimates[["theta[1]"]] <- .9
+dgp$param_estimates[["var_zeta"]] <- 1.0
+
+
+dgp_forecasts <- predict(
+  dgp,
+  horizon = 1,
+  forecast_representation = "quantile",
+  quantile_levels = c(0.025, 0.25, 0.5, 0.75, 0.975))
+
+p_dgp <- ggplot() +
+  geom_line(data = plot_data, mapping = aes(x = t, y = y)) +
+  geom_errorbar(
+    data = data.frame(t = 201, ymin = dgp_forecasts[1, 1], ymax = dgp_forecasts[1, 5]),
+    mapping = aes(x = t, ymin = ymin, ymax = ymax),
+    color = "cornflowerblue",
+    width = 3
+  ) +
+  geom_errorbar(
+    data = data.frame(t = 201, ymin = dgp_forecasts[1, 2], ymax = dgp_forecasts[1, 4]),
+    mapping = aes(x = t, ymin = ymin, ymax = ymax),
+    color = "orange",
+    width = 2
+  ) +
+  geom_point(
+    data = data.frame(t = 201, y = dgp_forecasts[1, 3]),
+    mapping = aes(x = t, y = y)
+  ) +
+  ggtitle("Forecast from data generating process") +
+  theme_bw()
+
+```
+
+```{r}
+grid.arrange(p_xval_fit, p_correct_fit, p_dgp)
+```
+
+```{r}
+bind_rows(
+  as.data.frame(xval_forecasts) %>% mutate(model = "crossval selected"),
+  as.data.frame(correct_forecasts) %>% mutate(model = "correct model, estimated"),
+  as.data.frame(dgp_forecasts) %>% mutate(model = "dgp")
+)
+```
+

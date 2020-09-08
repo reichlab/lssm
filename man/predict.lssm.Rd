@@ -6,16 +6,18 @@
 \usage{
 \method{predict}{lssm}(
   lssm_fit,
+  newdata,
   forecast_representation,
   quantile_levels = c(0.025, 0.25, 0.5, 0.75, 0.975),
   nsim = 1,
   seed = NULL,
-  newdata,
   horizon = 1,
   ...
 )
 }
 \arguments{
+\item{newdata}{numeric vector of new data to simulate forward from}
+
 \item{nsim}{number of sample trajectories to simulate}
 
 \item{seed}{either \code{NULL} or an integer that will be used in a call to
@@ -23,8 +25,6 @@
 saved as the "seed" attribute of the returned value.  The default, \code{NULL},
 will not change the random generator state, and return \code{.Random.seed}
 as the "seed" attribute}
-
-\item{newdata}{numeric vector of new data to simulate forward from}
 
 \item{horizon}{number of time steps forwards to simulate}
 

@@ -54,6 +54,9 @@ fit_arma <- function(
     q_ma,
     verbose = FALSE,
     ...) {
+  # drop leading NA's that may have resulted from differencing
+  y <- drop_leading_nas(y)
+  
   # input data for estimation
   stan_data <- list(
     n = length(y),
@@ -64,42 +67,42 @@ fit_arma <- function(
   )
 
   # initial values for estimation
-  if (p_ar > 0) {
-    # initialize to parameters for an AR(1) model
-    acf_1 <- as.numeric(acf(y, lag.max = 1, plot = FALSE)["1"]$acf)
-
-    init_par <- list(
-      phi = c(acf_1, rep(0.0, p_ar - 1)),
-      theta = rep(0.0, q_ma),
-      var_zeta = var(y) * (1 - acf_1^2),
-      a1 = c(y[1], rep(0.0, max(p_ar, q_ma + 1) - 1))
-    )
-    dim(init_par$a1) = length(init_par$a1)
-    dim(init_par$phi) = length(init_par$phi)
-    dim(init_par$theta) = length(init_par$theta)
-  } else if(q_ma > 0) {
-    # initialize to something near the parameters for an MA(1) model
-    acf_1 <- as.numeric(acf(y, lag.max = 1, plot = FALSE)["1"]$acf)
-    if(1 - 4 * acf_1^2 < 0) {
-      init_theta <- 1 / 2 * acf_1
-    } else {
-      init_theta <- (1 - sqrt(1 - 4 * acf_1^2)) / 2 * acf_1
-    }
-
-    init_par <- list(
-      phi = rep(0.0, p_ar),
-      theta = c(
-        init_theta,
-        rep(0.0, q_ma - 1)
-      ),
-      var_zeta = var(y) / (1 + init_theta^2),
-      a1 = c(y[1], rep(0.0, max(p_ar, q_ma + 1) - 1))
-    )
-    dim(init_par$a1) = length(init_par$a1)
-    dim(init_par$phi) = length(init_par$phi)
-    dim(init_par$theta) = length(init_par$theta)
-
-  }# else {
+  # if (p_ar > 0) {
+  #   # initialize to parameters for an AR(1) model
+  #   acf_1 <- as.numeric(acf(y, lag.max = 1, plot = FALSE)["1"]$acf)
+  # 
+  #   init_par <- list(
+  #     phi = c(acf_1, rep(0.0, p_ar - 1)),
+  #     theta = rep(0.0, q_ma),
+  #     var_zeta = var(y) * (1 - acf_1^2),
+  #     a1 = c(y[1], rep(0.0, max(p_ar, q_ma + 1) - 1))
+  #   )
+  #   dim(init_par$a1) = length(init_par$a1)
+  #   dim(init_par$phi) = length(init_par$phi)
+  #   dim(init_par$theta) = length(init_par$theta)
+  # } else if(q_ma > 0) {
+  #   # initialize to something near the parameters for an MA(1) model
+  #   acf_1 <- as.numeric(acf(y, lag.max = 1, plot = FALSE)["1"]$acf)
+  #   if(1 - 4 * acf_1^2 < 0) {
+  #     init_theta <- 1 / 2 * acf_1
+  #   } else {
+  #     init_theta <- (1 - sqrt(1 - 4 * acf_1^2)) / 2 * acf_1
+  #   }
+  # 
+  #   init_par <- list(
+  #     phi = rep(0.0, p_ar),
+  #     theta = c(
+  #       init_theta,
+  #       rep(0.0, q_ma - 1)
+  #     ),
+  #     var_zeta = var(y) / (1 + init_theta^2),
+  #     a1 = c(y[1], rep(0.0, max(p_ar, q_ma + 1) - 1))
+  #   )
+  #   dim(init_par$a1) = length(init_par$a1)
+  #   dim(init_par$phi) = length(init_par$phi)
+  #   dim(init_par$theta) = length(init_par$theta)
+  # 
+  # }# else {
     # initialize variance
     init_par <- list(
       phi = rep(0.0, p_ar),
@@ -149,6 +152,9 @@ predict.arma <- function(
   forecast_representation,
   quantile_levels = c(0.025, 0.25, 0.5, 0.75, 0.975),
   nsim = 1e5) {
+  # drop leading NA's that may have resulted from differencing
+  newdata <- drop_leading_nas(newdata)
+  
   if (horizon > 1) {
     stop("forecast horizon > 1 not yet supported")
   }

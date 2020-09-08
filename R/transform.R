@@ -123,11 +123,11 @@ invert_bc_transform <- function(b, lambda, gamma) {
 do_difference <- function(y, d = 0, D = 0, frequency = 1) {
   # first differencing
   for (i in seq_len(d)) {
-    y <- ts(
-      c(NA,
+#    y <- ts(
+    y <- c(NA,
         y[seq(from = 1 + 1, to = length(y))] -
-          y[seq(from = 1, to = length(y) - 1)]),
-    frequency = frequency)
+          y[seq(from = 1, to = length(y) - 1)])#,
+#    frequency = frequency)
   }
 
   # seasonal differencing
@@ -136,11 +136,11 @@ do_difference <- function(y, d = 0, D = 0, frequency = 1) {
                 "time series frequency of 1."))
   }
   for (i in seq_len(D)) {
-    y <- ts(
-      c(rep(NA, frequency),
+#    y <- ts(
+    y <- c(rep(NA, frequency),
         y[seq(from = frequency + 1, to = length(y))] -
-          y[seq(from = 1, to = length(y) - frequency)]),
-      frequency = frequency)
+          y[seq(from = 1, to = length(y) - frequency)])#,
+#      frequency = frequency)
   }
 
   return(y)
@@ -187,7 +187,8 @@ invert_difference <- function(dy, y, d, D, frequency) {
     dy <- dy_full[length(y_dm1) + seq_along(dy)]
   }
 
-  return(ts(dy, frequency = frequency))
+  return(dy)
+#  return(ts(dy, frequency = frequency))
 }
 
 
@@ -203,10 +204,7 @@ invert_difference <- function(dy, y, d, D, frequency) {
 interpolate_and_clean_missing <- function(y) {
   if (any(is.na(y) | is.infinite(y)) && !is.na(tail(y, 1))) {
     ## drop leading NAs
-    if (is.na(y[1]) | is.infinite(y[1])) {
-      num_leading_nas <- rle(is.na(y) | is.infinite(y))$lengths[1]
-      y <- y[- seq_len(num_leading_nas)]
-    }
+    y <- drop_leading_nas(y)
 
     ## interpolate internal NAs
     while (any(is.na(y) | is.infinite(y))) {
@@ -221,6 +219,24 @@ interpolate_and_clean_missing <- function(y) {
           method = "linear"
           )$y
     }
+  }
+
+  return(y)
+}
+
+
+#' Remove leading values that are infinite or missing
+#'
+#' @param y a univariate time series or numeric vector
+#'
+#' @return a vector of the same class as y
+#'
+#' @export
+drop_leading_nas <- function(y) {
+  ## drop leading NAs
+  if (is.na(y[1]) | is.infinite(y[1])) {
+    num_leading_nas <- rle(is.na(y) | is.infinite(y))$lengths[1]
+    y <- y[- seq_len(num_leading_nas)]
   }
 
   return(y)
