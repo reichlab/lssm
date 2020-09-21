@@ -151,3 +151,62 @@ dim(stan_data$theta) = 1
 
 prediction = optimizing(model, stan_data)
 
+# SARIMA fit
+phi = c(.2, .5)
+Phi = 0.1
+ts_frequency = 4
+#(2,0,0)(1,0,0)4
+fake_data_sarima <- arima.sim(model = list(ar = c(.2, .5, 0, .1,-0.02, -0.05)), n = 200)
+model <- stan_model("inst/stan_models/SARIMA.stan")
+stan_data <- list(
+  n = length(fake_data_sarima),
+  p = 1,
+  y = array(data=fake_data_sarima, dim = c(200,1)),
+  p_ar = 2,
+  q_ma = 0,
+  P_ar = 1,
+  Q_ma = 0,
+  ts_frequency = 4,
+  include_state_intercept = 1,
+  include_obs_intercept = 1
+)
+
+estimate_sarima <- optimizing(model, stan_data)
+
+# SARIMA predict
+model <- stan_model("inst/stan_models/SARIMA_predict.stan")
+stan_data <- list(
+  n = length(fake_data_sarima),
+  p = 1,
+  y = array(data=fake_data_sarima, dim = c(200,1)),
+  horizon = 3,
+  p_ar = 2,
+  q_ma = 0,
+  P_ar = 1,
+  Q_ma = 0,
+  ts_frequency = 4,
+  include_state_intercept = 1,
+  include_obs_intercept = 1,
+  # r = max(p_ar, q_ma+1)
+  r = 6,
+  # m = r
+  m = 6,
+  phi_0 = estimate_sarima$par["phi_0[1]"],
+  d_0 = estimate_sarima$par["d_0[1]"],
+  phi = c(estimate_sarima$par["phi[1]"],estimate_sarima$par["phi[2]"]),
+  phi_seasonal = estimate_sarima$par["phi_seasonal[1]"],
+  theta = vector(mode = "numeric", length = 0),
+  theta_seasonal = vector(mode = "numeric", length = 0),
+  var_zeta =  estimate_sarima$par["var_zeta"],
+  a1 = c(estimate_sarima$par["a1[1]"],estimate_sarima$par["a1[2]"],estimate_sarima$par["a1[3]"],
+         estimate_sarima$par["a1[4]"],estimate_sarima$par["a1[5]"], estimate_sarima$par["a1[6]"])
+)
+dim(stan_data$a1) = 6
+dim(stan_data$phi_0) = 1
+dim(stan_data$d_0) = 1
+dim(stan_data$phi) = 2
+dim(stan_data$phi_seasonal) = 1
+dim(stan_data$theta) = 0
+dim(stan_data$theta_seasonal) = 0
+
+prediction = optimizing(model, stan_data)
