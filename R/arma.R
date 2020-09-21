@@ -136,6 +136,9 @@ fit_arma <- function(
 #' @param forecast_representation string specifying approach to representing
 #' forecast distributions. One of "named_dist", "sample", or "quantile";
 #' see documentation of `represent_forecasts` for more detail.
+#' @param joint logical; if TRUE, named distribution representation tracks the
+#' joint distribution of y_t over all horizons.  if FALSE, we track only the
+#' marginal distributions at each horizon.
 #' @param quantile_levels numeric vector of quantile levels to use for
 #' forecast_representation = "quantile"
 #' @param nsim integer number of samples to use for
@@ -150,20 +153,24 @@ predict.arma <- function(
   newdata,
   horizon,
   forecast_representation,
+  joint = TRUE,
   quantile_levels = c(0.025, 0.25, 0.5, 0.75, 0.975),
   nsim = 1e5) {
   # drop leading NA's that may have resulted from differencing
   newdata <- drop_leading_nas(newdata)
   
   if (horizon > 1) {
-    stop("forecast horizon > 1 not yet supported")
+    if(!joint) {
+      stop("forecast horizon > 1 not yet supported")
+    }
   }
 
   stan_data <- list(
     n = length(newdata),
     p = 1,
     y = array(data = newdata, dim = c(length(newdata), 1)),
-    steps_ahead = horizon,
+    horizon = horizon,
+    joint = as.integer(joint),
     p_ar = arma_fit$p_ar,
     q_ma = arma_fit$q_ma,
     r = max(arma_fit$p_ar, arma_fit$q_ma + 1),
@@ -187,20 +194,26 @@ predict.arma <- function(
     chains = 1, iter = 1, warmup = 0
   )
 
-  raw_prediction <- rstan::extract(stan_output)$results
+  raw_prediction <- rstan::extract(stan_output)$forecasts
 
-  named_dist_forecast <- purrr::map_dfr(
-    seq_len(horizon),
-    function(h) {
-      data.frame(
-        h = h,
-        family = "norm",
-        mean = raw_prediction[1, 1, 1],
-        sd = sqrt(raw_prediction[1, 1, 2]),
-        stringsAsFactors = FALSE
+  if(joint) {
+    named_dist_forecast <- tibble(
+      h = list(seq_len(horizon)),
+      family = "mvnorm",
+      mean = list(raw_prediction[1, 1, , 1]),
+      sigma = list(
+        raw_prediction[1, 1, , seq(from = 2, to = dim(raw_prediction)[4])]
       )
-    }
-  )
+    )
+  } else {
+    named_dist_forecast <- data.frame(
+      h = seq_len(horizon),
+      family = "norm",
+      mean = raw_prediction[1, 1, 1],
+      sd = sqrt(raw_prediction[1, 1, 2]),
+      stringsAsFactors = FALSE
+    )
+  }
 
   forecast <- represent_forecasts(
     named_dist_forecast = named_dist_forecast,

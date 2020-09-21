@@ -53,7 +53,7 @@ ggplot() +
 library(rstan)
 rstan_options(auto_write = TRUE)
 # AR1 fit
-model <- stan_model("inst/stan_models/AR1.stan")
+model <- stan_model("inst/stan/ARMA_model.stan")
 
 stan_data <- list(
   n = length(fake_data),

@@ -13,7 +13,10 @@ data {
   // number of previous noise terms
   int<lower=0> q_ma;
   
-  int <lower=1> steps_ahead;
+  int<lower=1> horizon;
+  
+  // marginal distribution at each forecast horizon, or joint across all horizons
+  int<lower=0, upper=1> joint;
   
   // parameters
   vector[p_ar] phi;
@@ -69,18 +72,33 @@ transformed data{
   // variance for the initial state
   matrix[m,m] P1 = var_zeta * stationary_cov(T, quad_form_sym(Q, R '));
 
-  
+  // shape of result
+  int result_nrow;
+  int result_ncol;
+  int result_length;
+  if(joint == 0) {
+    // marginal distribution parameters separately per horizon
+    result_nrow = p;
+    result_ncol = p + 1;
+    result_length = horizon;
+  } else {
+    result_nrow = horizon * p;
+    result_ncol = horizon * p + 1;
+    result_length = 1;
+  }
 }
 
 parameters {
   
-  
 }
 
 generated quantities{
-  matrix[p,p+1] results;
-  results = predict (y, d, Z, H, c, T, R, Q, a1, P1,steps_ahead);
-  
+  matrix[result_nrow, result_ncol] forecasts[result_length];
+  if(joint == 0) {
+    forecasts[1] = predict(y, d, Z, H, c, T, R, Q, a1, P1, horizon);
+  } else {
+    forecasts[1] = ssm_constant_joint_predict(y, d, Z, H, c, T, R, Q, a1, P1, horizon);
+  }
 }
 
 

@@ -2076,6 +2076,117 @@ functions{
     return append_col(to_matrix(Z*a), F);
   }
 
+
+  /**
+  ---
+  function: ssm_constant_joint_predict
+  args:
+  - name: y
+    description: Observations, $\vec{y}_t$. An array of size $n$ of $p \times 1$ vectors.
+  - name: d
+    description: Observation intercept, $\vec{d}_t$. An array of $p \times 1$ vectors.
+  - name: Z
+    description: Design matrix, $\mat{Z}_t$. An array of $p \times m$ matrices.
+  - name: H
+    description: Observation covariance matrix, $\mat{H}_t$. An array of $p \times p$ matrices.
+  - name: c
+    description: State intercept, $\vec{c}_t$. An array of $m \times 1$ vectors.
+  - name: T
+    description: Transition matrix, $\mat{T}_t$. An array of $m \times m$ matrices.
+  - name: R
+    description: State covariance selection matrix, $\mat{R} _t$. An array of $p \times q$ matrices.
+  - name: Q
+    description: State covariance matrix, $\mat{Q}_t$. An array of $q \times q$ matrices.
+  - name: a1
+    description: Expected value of the intial state, $a_1 = \E(\alpha_1)$. An $m \times 1$ matrix.
+  - name: P1
+    description: Variance of the initial state, $P_1 = \Var(\alpha_1)$. An $m \times m$ matrix.
+  returns: The log-likelihood, $p(\vec{y}_{1:n} | \vec{d}, \mat{Z}, \mat{H}, \vec{c}, \mat{T}, \mat{R}, \mat{Q})$, marginalized over the latent states.
+  ---
+  
+  Obtain the mean and covariance for the joint predictive distribution over the following horizon time steps
+  
+  This function requires the system matrices (`d`, `Z`, `H`, `c`, `T`, `R`, `Q`)
+  to all be time invariant (constant).
+  It also assumes the observation noise variance is 0, as in a formulation of an ARMA model.
+  */
+  matrix ssm_constant_joint_predict(vector[] y,
+                          vector d, matrix Z, matrix H,
+                          vector c, matrix T, matrix R, matrix Q,
+                          vector a1, matrix P1, int horizon) {
+    // variable declarations
+    int m = cols(Z);
+    int n = size(y);
+    int p = rows(Z);
+    
+    vector[p*horizon] d_tilde;
+    vector[m*horizon] a_star = rep_vector(0, m*horizon);
+    matrix[p*horizon, p*horizon] H_tilde = rep_matrix(0, p*horizon, p*horizon);
+    
+    vector[m*horizon] c_tilde = rep_vector(0, m*horizon);
+    matrix[p*horizon, m*horizon] ZT_tilde =
+      rep_matrix(0, p*horizon, m*horizon);
+    matrix[m*horizon, m*horizon] Q_star =
+      rep_matrix(0, m*horizon, m*horizon);
+    matrix[m, m] RQR = quad_form_sym(Q, R');
+    
+    // run Kalman filter to get predicted state and predictive covariance for
+    // horizon 1
+    vector[m] a;
+    matrix[m, m] P;
+    {
+      vector[p] v;
+      matrix[p, p] Finv;
+      matrix[m, p] K;
+
+      a = a1;
+      P = P1;
+      for (t in 1:n) {
+        v = ssm_update_v(y[t], a, d, Z);
+        Finv = ssm_update_Finv(P, Z, H);
+        K = ssm_update_K(P, Z, T, Finv);
+        a = ssm_update_a(a, c, T, v, K);
+        P = ssm_update_P(P, Z, T, RQR, K);
+      }
+    }
+    
+    // set up full matrices to represent system over horizon time steps
+    {
+      matrix[p, m] ZT = Z;
+      
+      a_star[1:m] = a;
+      
+      for (h in 1:horizon) {
+        d_tilde[((h - 1) * p + 1):(h * p)] = d;
+        if (h > 1) {
+          c_tilde[((h - 1) * m + 1):(h * m)] = c;
+          ZT = ZT * T;
+        }
+        
+        H_tilde[((h - 1) * p + 1):(h * p), ((h - 1) * p + 1):(h * p)] = H;
+        
+        for (i in 1:(horizon - h + 1)) {
+          ZT_tilde[((i + h - 2) * p + 1):((i + h -  1) * p), ((i - 1) * m + 1):(i * m)] = ZT;
+        }
+      }
+    }
+    
+    Q_star[1:m, 1:m] = P;
+    if (horizon > 1) {
+      for (h in 2:horizon) {
+        Q_star[((h - 1) * m + 1):(h * m), ((h - 1) * m + 1):(h * m)] = RQR;
+      }
+    }
+//    print("Q_star = ");
+//    print(Q_star);
+    
+    return append_col(
+      to_matrix(d_tilde) + ZT_tilde * to_matrix(c_tilde + a_star),
+      quad_form_sym(Q_star, ZT_tilde') + H_tilde
+    );
+  }
+  
+  
   /**
   
   `r render_section("Common Smoother Functions")`

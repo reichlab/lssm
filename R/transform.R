@@ -148,7 +148,8 @@ do_difference <- function(y, d = 0, D = 0, frequency = 1) {
 
 
 #' Invert first-order and seasonal differencing (go from seasonally differenced
-#' time series to original time series).
+#' time series to original time series).  In this function, all values of y and
+#' dy are fixed numeric values.
 #'
 #' @param dy a first-order and/or seasonally differenced univariate time series
 #'   with values like y_{t} - y_{t - ts_frequency}
@@ -166,7 +167,7 @@ do_difference <- function(y, d = 0, D = 0, frequency = 1) {
 #' @return a time series object (of class 'ts')
 #'
 #' @export
-invert_difference <- function(dy, y, d, D, frequency) {
+invert_difference_deterministic <- function(dy, y, d, D, frequency) {
   for (i in seq_len(d)) {
     y_dm1 <- do_difference(y, d = d - i, D = D, frequency = frequency)
     dy_full <- c(y_dm1, dy)
@@ -188,8 +189,87 @@ invert_difference <- function(dy, y, d, D, frequency) {
   }
 
   return(dy)
-#  return(ts(dy, frequency = frequency))
 }
+
+
+#' Invert first-order and seasonal differencing (go from seasonally differenced
+#' time series to original time series).  In this function, all values of y are
+#' fixed numeric values and dy must be a representation of the joint
+#' distribution over all relevant time points with a multivariate normal
+#' distribution.  This should be in the form of a tibble with columns mean
+#' containing the mean and sigma containing the covariance matrix.
+#'
+#' @param dy a first-order and/or seasonally differenced univariate time series
+#'   with values like y_{t} - y_{t - ts_frequency}
+#' @param y a univariate time series or numeric vector with values like
+#'   y_{t - ts_frequency}.
+#' @param d order of first differencing
+#' @param D order of seasonal differencing
+#' @param frequency frequency of time series.  Must be provided if y is not
+#'   of class "ts" and D > 0.  See the help for stats::ts for more.
+#'
+#' @details y may have longer length than dy.  It is assumed that dy "starts"
+#'   one time index after y "ends": that is, if y is of length T, d = 0, and
+#'   D = 1 then dy[1] = y[T + 1] - y[T + 1 - ts_frequency]
+#'
+#' @return a tibble with all the same entries as the argument dy, but with
+#' the mean and covariance of the original undifferenced data at those time
+#' points
+#'
+#' @export
+invert_difference_probabilistic <- function(dy, y, d, D, frequency) {
+  if(d > 0) {
+    # set up matrix encoding un-differencing operation
+    A <- cbind(
+      matrix(0, nrow = length(dy$mean), ncol = 1),
+      diag(length(dy$mean))
+    )
+    A[cbind(seq_along(dy$mean), seq_along(dy$mean))] <- 1
+
+    # augmented covariance with 0s for observed quantities
+    sigma_full <- matrix(
+      0,
+      nrow = length(dy$mean + 1),
+      ncol = length(dy$mean + 1)
+    )
+    
+    for (i in seq_len(d)) {
+      y_dm1 <- do_difference(y, d = d - i, D = D, frequency = frequency)
+      mean_full <- c(tail(y_dm1, 1), dy$mean)
+      sigma_full[1 + seq_along(dy$mean), 1 + seq_along(dy$mean)] <- dy$sigma
+      dy$mean <- A %*% mean_full
+      dy$sigma <- emulator::quad.tform(sigma_full, A)
+    }
+  }
+  
+  if(D > 0) {
+    # set up matrix encoding un-differencing operation
+    A <- cbind(
+      matrix(0, nrow = length(dy$mean), ncol = frequency),
+      diag(length(dy$mean))
+    )
+    A[cbind(seq_along(dy$mean), seq_along(dy$mean))] <- 1
+    
+    # augmented covariance with 0s for observed quantities
+    sigma_full <- matrix(
+      0,
+      nrow = length(dy$mean + frequency),
+      ncol = length(dy$mean + frequency)
+    )
+    
+    for (i in seq_len(D)) {
+      y_dm1 <- do_difference(y, d = 0, D = D - i, frequency = frequency)
+      mean_full <- c(tail(y_dm1, frequency), dy$mean)
+      sigma_full[frequency + seq_along(dy$mean),
+                 frequency + seq_along(dy$mean)] <- dy$sigma
+      dy$mean <- A %*% mean_full
+      dy$sigma <- emulator::quad.tform(sigma_full, A)
+    }
+  }
+  
+  return(dy)
+}
+
 
 
 #' Remove leading values that are infinite or missing, and replace all internal

@@ -1,3 +1,86 @@
+#' Multivariate log-normal probability density function
+#' 
+#' @param x vector or matrix of quantiles.  If `x` is a matrix, each row is
+#' taken to be a quantile.
+#' @param mean mean vector, default is `rep(0, length = ncol(x))`
+#' @param sigma covariance matrix, deault is `diag(ncol(x))`
+#' @param offset offset applied before log transformation
+#' @param log logical; if `TRUE`, densities `d` are given as `log(d)`
+#' 
+#' @export
+dlogmvnorm <- function(
+  x,
+  mean = rep(0, p),
+  sigma = diag(p),
+  offset = 0,
+  log) {
+  if (is.vector(x)) {
+    x <- matrix(x, ncol = length(x))
+  }
+  p <- ncol(x)
+  
+  log_x <- log(x + offset)
+  
+  log_result <- dmvnorm(
+    log_x,
+    mean = mean,
+    sigma = sigma,
+    log = TRUE) -
+    apply(log_x, 1, sum)
+  
+  if(log) {
+    return(log_result)
+  } else {
+    return(exp(log_result))
+  }
+}
+
+
+#' Multivariate Box-Cox transformed normal probability density function
+#' 
+#' @param x vector or matrix of quantiles.  If `x` is a matrix, each row is
+#' taken to be a quantile.
+#' @param mean mean vector, default is `rep(0, length = ncol(x))`
+#' @param sigma covariance matrix, deault is `diag(ncol(x))`
+#' @param lambda power for Box-Cox transformation
+#' @param offset offset applied before Box-Cox transformation
+#' @param log logical; if `TRUE`, densities `d` are given as `log(d)`
+#' 
+#' @export
+dbcmvnorm <- function(
+  x,
+  mean = rep(0, p),
+  sigma = diag(p),
+  lambda = 0,
+  offset = 0,
+  log) {
+  if (is.vector(x)) {
+    x <- matrix(x, ncol = length(x))
+  }
+  p <- ncol(x)
+  
+  bc_x <- do_initial_transform(
+    y = x,
+    transformation = "box-cox",
+    transform_offset = offset,
+    bc_lambda = lambda)
+  log_x <- log(x + offset)
+  
+  log_result <- dmvnorm(
+    bc_x,
+    mean = mean,
+    sigma = sigma,
+    log = TRUE) +
+    (lambda - 1) * apply(log_x, 1, sum)
+  
+  if(log) {
+    return(log_result)
+  } else {
+    return(exp(log_result))
+  }
+}
+
+
 #' Create a sequence of integers
 #'
 #' @param from starting value for sequence
@@ -171,7 +254,7 @@ log_score_summary <- function(
     return(c("log_score" = 1.0))
   }
   
-  dfun <- paste0("d", pred_attrs$family[1])
+  dfun <- paste0("d", pred_attrs$family[[1]])
   call_args <- pred_attrs[!(names(pred_attrs) %in% c("family", "h"))]
   call_args$x <- data$obs
   call_args$log <- TRUE

@@ -9,6 +9,7 @@
   newdata,
   horizon,
   forecast_representation,
+  joint = TRUE,
   quantile_levels = c(0.025, 0.25, 0.5, 0.75, 0.975),
   nsim = 1e+05
 )
@@ -21,6 +22,10 @@
 \item{forecast_representation}{string specifying approach to representing
 forecast distributions. One of "named_dist", "sample", or "quantile";
 see documentation of \code{represent_forecasts} for more detail.}
+
+\item{joint}{logical; if TRUE, named distribution representation tracks the
+joint distribution of y_t over all horizons.  if FALSE, we track only the
+marginal distributions at each horizon.}
 
 \item{quantile_levels}{numeric vector of quantile levels to use for
 forecast_representation = "quantile"}

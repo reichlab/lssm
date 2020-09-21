@@ -1,0 +1,249 @@
+---
+title: "Forecast distributions"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{forecast_distributions}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+# Introduction
+
+In this document we work through the derivations of joint predictive distributions over the $H$ time steps after the end of the time series, including adjustments for differencing and transformations.  Our goal is to derive exact joint distributions for the future observable variables $y_{n + 1}, \ldots, y_{n + H}$ given the observed data $y_1, \ldots, y_n$. These distributions will be used to calculate a log score for cross-validation.
+
+We begin by establishing notation, then derive the joint predictive distribution in a setting where no differencing or transformations have been done, followed by derivations of the adjustments to be made in case of differencing and transformations.
+
+# Notation
+
+## General State Space Model Statement
+
+We work with the general state space model as defined in Durbin and Koopman, extended with intercepts in the observation and state processes:
+
+\begin{align*}
+\vec{y}_t &= d_t + Z_t \vec{\alpha}_t + \vec{\varepsilon}_t \\
+\vec{\alpha}_{t + 1} &= c_t + T_t \vec{\alpha}_t + R_t \vec{\eta}_t \\
+\vec{\varepsilon}_t &\sim N(0, H_t) \\
+\vec{\eta}_t &\sim N(0, Q_t) \\
+\vec{\alpha}_1 &\sim N(\vec{a}_1, P_1) .
+\end{align*}
+
+At each time point $t$:
+
+ * $Y_t$, $d_t$, and $\varepsilon_t$ are $p \times 1$ column vectors;
+ * $Z_t$ is a $p \times m$ matrix;
+ * $\alpha_t$ and $c_t$ are $m \times 1$ column vectors;
+ * $T_t$ is an $m \times m$ matrix;
+ * $R_t$ is an $m \times q$ matrix;
+ * $\eta_t$ is a $q \times 1$ column vector
+
+We adopt the convention in Durbin and Koopman that $Y_t$ denotes the column vector of data up through time t.
+
+## Joint forecast distribution over multiple time steps
+
+Suppose we have observed data up through time $n$.  With these data as input, the Kalman filter will produce a predictive distribution for the state at time $n+1$:
+
+$$\alpha_{n+1} \sim N(a_{n+1}, P_{n+1}),$$
+where $a_{n+1} = E(\alpha_{n+1} | y_1, \ldots, y_n)$ and $P_{n+1} = Var(\alpha_{n+1} | y_1, \ldots, y_n)$.
+
+We are interested in the joint conditional distribution of the observable variables in the following $h$ time steps given the observed data so far. Following the construction in Section 4.13 of Durbin and Koopman, we can write the joint observation model for these variables as
+
+\begin{align}
+\tilde{Y} &= \begin{bmatrix} y_{n + 1} \\ y_{n + 2} \\ \ldots \\ y_{n+h} \end{bmatrix} = \tilde{d} + \tilde{Z} \tilde{\alpha} + \tilde{\varepsilon} \label{eqn:y_pred_obs} \\
+\tilde{d} &= \begin{bmatrix} d_{n+1} \\ d_{n+2} \\ \vdots \\ d_{n+h} \end{bmatrix} \\
+\tilde{Z} &= \begin{bmatrix}
+Z_{n+1} & 0 & \cdots & 0 \\
+0   & Z_{n+2}  & \cdots & 0 \\
+\vdots & \vdots & \ddots & \vdots \\
+0 & 0 & \cdots & Z_{n+h}
+\end{bmatrix} \nonumber \\
+\tilde{\alpha} &= \begin{bmatrix} \alpha_{n + 1} \\ \alpha_{n + 2} \\ \vdots \\ \alpha_{n + h} \end{bmatrix} \nonumber \\
+\varepsilon &= \begin{bmatrix} \varepsilon_{n + 1} \\ \varepsilon_{n + 2} \\ \ldots \\ \varepsilon_{n+h} \end{bmatrix} \sim N(0, H) \nonumber \\
+\tilde{H} &= \begin{bmatrix}
+H_{n+1} & 0 & \cdots & 0 \\
+0 & H_{n+2} & \cdots & 0 \\
+\vdots & \vdots & \ddots & \vdots \\
+0 & 0 & \cdots & H_{n+h} \\
+\end{bmatrix} \nonumber
+\end{align}
+
+The joint state model over these time points can be written as:
+
+\begin{align}
+\tilde{\alpha} &= \tilde{T}(\tilde{c} + \alpha^{*}_{n + 1} + \tilde{R} \tilde{\eta}) \label{eqn:y_pred_state} \\
+\tilde{T} &= \begin{bmatrix}
+I & 0 & 0 & \cdots & 0 \\
+T_{n + 1} & I & 0 & \cdots & 0 \\
+T_{n + 2} T_{n + 1} & T_{n + 2} & I & \cdots & 0  \\
+\vdots & \vdots & \vdots & \ddots & \vdots \\
+T_{n + h - 1} \cdots T_{n + 1} & T_{n + h - 1} \cdots T_{n + 2} & T_{n + h - 1} \cdots T_{n + 3} & \cdots & I  \\
+\end{bmatrix} \nonumber \\
+\tilde{c} &= \begin{bmatrix} 0 \\ c_{n+1} \\ c_{n+2} \\ \vdots \\ c_{n+h} \end{bmatrix} \\
+\alpha^{*}_{n + 1} &= \begin{bmatrix} \alpha_{n + 1} \\ 0 \\ \vdots \\ 0 \end{bmatrix} \nonumber \\
+\tilde{R} &= \begin{bmatrix}
+0 & 0 & \cdots & 0 \\
+R_{n + 1} & 0  & \cdots & 0 \\
+0  & R_{n + 2} & \cdots & 0 \\
+\vdots & \vdots & \ddots  & \vdots \\
+0 & 0 & \cdots & R_{n + h - 1}
+\end{bmatrix} \nonumber \\
+\tilde{\eta} &= \begin{bmatrix} \eta_{n + 1} \\ \eta_{n + 2} \\ \vdots \\ \eta_{n + h - 1} \end{bmatrix} \nonumber \\
+\tilde{Q} &= \begin{bmatrix}
+Q_{n + 1} & 0 & \cdots & 0 \\
+0  & Q_{n + 2} & \cdots & 0 \\
+\vdots & \vdots & \ddots & \vdots \\
+0 & 0 & \cdots & Q_{n + h - 1}
+\end{bmatrix} \nonumber
+\end{align}
+
+Combining the above equations, we obtain
+
+$$\tilde{Y} = \tilde{d} + \tilde{Z} \tilde{\alpha} + \tilde{\varepsilon} = \tilde{d} + \tilde{Z} \tilde{T}(\tilde{c} + \alpha^{*}_{n + 1} + \tilde{R} \tilde{\eta}) + \tilde{\varepsilon}$$
+
+With these definitions in place, we find that the joint distribution of $\tilde{Y}$ given $y_1, \ldots, y_n$ is normal with mean
+
+\begin{align*}
+E(\tilde{Y}) &= E\left[\tilde{d} + \tilde{Z} \tilde{T}(\tilde{c} + \alpha^{*}_{n + 1} + \tilde{R} \tilde{\eta}) + \tilde{\varepsilon} \right] \\
+&= \tilde{d} + \tilde{Z} \tilde{T} E\left(\tilde{c} + \alpha^{*}_{n + 1} \right) \\
+&= \tilde{d} + \tilde{Z} \tilde{T} \left(\tilde{c} + a^{*}_{n + 1} \right)
+\end{align*}
+
+and covariance
+
+\begin{align*}
+Cov(\tilde{Y}) &= Cov\left[\tilde{d} + \tilde{Z} \tilde{T}(\tilde{c} + \alpha^{*}_{n + 1} + \tilde{R} \tilde{\eta}) + \tilde{\varepsilon} \right] \\
+&= \tilde{Z} \tilde{T} Cov\left[ \alpha^{*}_{n + 1} + \tilde{R} \tilde{\eta} \right] (\tilde{Z}\tilde{T})' + Cov \left[ \tilde{\varepsilon} \right] \\
+&= \tilde{Z} \tilde{T} (P^*_{n+1} + \tilde{R} \tilde{Q} \tilde{R}') (\tilde{Z} \tilde{T})' + \tilde{H}
+\end{align*}
+
+Here $P^*_{n+1}$ is the $mh \times mh$ matrix with $P_{n+1}$ in the upper left block and 0 elsewhere.
+
+In the case where the system matrices don't change over time, we can simplify $\tilde{T}$ as follows:
+
+$$
+\tilde{T} = \begin{bmatrix}
+I & 0 & 0 & \cdots & 0 \\
+T & I & 0 & \cdots & 0 \\
+T^2 & T & I & \cdots & 0  \\
+\vdots & \vdots & \vdots & \ddots & \vdots \\
+T^{n + h - 1} & T^{n + h - 2} & T^{n + h - 3} & \cdots & I  \\
+\end{bmatrix}
+$$
+
+$\tilde{Z}$ simplifies similarly, so that the product is
+
+$$\tilde{Z} \tilde{T} = \begin{bmatrix}
+Z & 0 & 0 & \cdots & 0 \\
+ZT & Z & 0 & \cdots & 0 \\
+ZT^2 & ZT & Z & \cdots & 0 \\
+\vdots & \vdots & \vdots & \ddots & \vdots \\
+ZT^{n + h - 1} & ZT^{n + h - 2} & ZT^{n + h - 3} & \cdots & Z  \\
+\end{bmatrix}
+$$
+
+The term $Q^* = (P^*_{n+1} + \tilde{R} \tilde{Q} \tilde{R}')$ also simplifies to
+
+$$Q^* = (P^*_{n+1} + \tilde{R} \tilde{Q} \tilde{R}') = \begin{bmatrix}
+P_{n+1} & 0 & 0 & \cdots & 0 \\
+0 & RQR' & 0 & \cdots & 0 \\
+0 & 0 & RQR' & \cdots & 0 \\
+\vdots & \vdots & \vdots & \ddots & \vdots \\
+0 & 0 & 0 & \cdots & RQR' \\
+\end{bmatrix}
+$$
+
+## Inverting Differencing
+
+Suppose $y^*_{t}$ denotes a differenced value at time $t$ and $y_t$ denotes a value with one less level of differencing: $y^*_{n + h} = y_{n + h} - y_{n + h - l}$ for a differencing lag $l$.  Rearranging, we can invert the differencing operation to obtain $y_{n + h} = y^*_{n + h} + y_{n + h - l}$.  In practice when forecasting, we will have a normally distributed predictive distribution for $(y^*_{n + 1}, \ldots, y^*_{n + h})' \sim N(\mu_h, \Sigma_h)$.  When inverting differencing with a lag $l$, we augment this with the previous $l - 1$ observed values to obtain a random vector with a degenerate normal distribution:
+
+$$
+\begin{bmatrix} y_{n - l + 1} \\ \vdots \\ y_n \\ y^*_{n + 1} \\ \vdots \\ y^*_{n +h} \end{bmatrix} \sim
+N\left( \begin{bmatrix} y_{n - l + 1} \\ \vdots \\ y_n \\ \mu_h \end{bmatrix},
+\begin{bmatrix}
+0 & \cdots & 0 & 0 \\
+\vdots & \ddots & \vdots & \vdots \\
+0 & \cdots & 0 & 0 \\
+0 & \cdots & 0 & \Sigma_h \\
+\end{bmatrix} \right)
+$$
+
+The inverse differencing operation is then achieved by multiplying this vector by the matrix
+
+$$
+U = \begin{bmatrix}
+1 & 0 & \cdots & 0 & 1 & 0 & \cdots & 0 \\
+0 & 1 & \cdots & 0 & 0 & 1 & \cdots & 0 \\
+\vdots & \vdots & \ddots & \vdots & \vdots & \vdots & \ddots & \vdots \\
+0 & 0 & \cdots & 1 & 0 & 0 & \cdots & 0 \\
+\end{bmatrix}
+$$
+
+In each row of this matrix, the ones are separated by $l$ positions.
+
+## Inverting Transformations
+
+### Log
+
+Suppose $y^* \sim \text{MVN}(\mu, \Sigma)$ is a $d$-dimensional random vector and $y = \exp(y^*) - \gamma = \left(\exp(y^*_1) - \gamma, \ldots, \exp(y^*_d) - \gamma\right)$; that is, $y \sim \text{Log-MVN}(\mu, \Sigma, \gamma)$ with offset $\gamma$.
+
+The inverse transformation is $y^* = \log(y + \gamma) = \left(\log(y_1 + \gamma), \ldots, \log(y_d + \gamma)\right)$, with Jacobian
+
+$$
+J = \begin{bmatrix}
+\frac{\partial}{\partial y_1} y^*_1 & \frac{\partial}{\partial y_2} y^*_1 & \cdots & \frac{\partial}{\partial y_d} y^*_1 \\
+\frac{\partial}{\partial y_1} y^*_2 & \frac{\partial}{\partial y_2} y^*_2 & \cdots & \frac{\partial}{\partial y_d} y^*_2 \\
+\vdots & \vdots & \ddots & \vdots \\
+\frac{\partial}{\partial y_1} y^*_d & \frac{\partial}{\partial y_2} y^*_d & \cdots & \frac{\partial}{\partial y_d} y^*_d \\
+\end{bmatrix} =
+\begin{bmatrix}
+\frac{1}{y_1 + \gamma} & 0 & \cdots & 0 \\
+0 & \frac{1}{y_2 + \gamma} & \cdots & 0 \\
+\vdots & \vdots & \ddots & \vdots \\
+0 & 0 & \cdots & \frac{1}{y_d + \gamma}
+\end{bmatrix}.
+$$
+
+Therefore the pdf of the multivariate log-normal distribution is
+
+$$
+f_{Log-MVN}(y; \mu, \Sigma, \gamma) = f_{MVN}\left(\log(y + \gamma); \mu, \Sigma\right) \cdot \prod_{j = 1}^d \frac{1}{y_d + \gamma}
+$$
+
+The log of this density is
+
+$$
+\log\left\{f_{Log-MVN}(y; \mu, \Sigma, \gamma)\right\} = \log\left\{f_{MVN}\left(\log(y + \gamma); \mu, \Sigma\right) \right\} - \sum_{j = 1}^d \log(y_d + \gamma)
+$$
+
+### Box-Cox
+
+Suppose $y^* \sim \text{MVN}(\mu, \Sigma)$ is a $d$-dimensional random vector and $y^*$ is the Box-Cox transformation of $y$ with offset $\gamma$: $y^* = BC(y; \lambda, \gamma) = \frac{(y + \gamma)^\lambda-1}{\lambda}$.  We write $y \sim \text{BC-MVN}(\mu, \Sigma, \lambda, \gamma)$.
+
+The Jacobian of the Box-Cox transformation is:
+
+$$
+J = \begin{bmatrix}
+\frac{\partial}{\partial y_1} y^*_1 & \frac{\partial}{\partial y_2} y^*_1 & \cdots & \frac{\partial}{\partial y_d} y^*_1 \\
+\frac{\partial}{\partial y_1} y^*_2 & \frac{\partial}{\partial y_2} y^*_2 & \cdots & \frac{\partial}{\partial y_d} y^*_2 \\
+\vdots & \vdots & \ddots & \vdots \\
+\frac{\partial}{\partial y_1} y^*_d & \frac{\partial}{\partial y_2} y^*_d & \cdots & \frac{\partial}{\partial y_d} y^*_d \\
+\end{bmatrix} =
+\begin{bmatrix}
+(y_1 + \gamma)^{(\lambda-1)} & 0 & \cdots & 0 \\
+0 & (y_2 + \gamma)^{(\lambda-1)} & \cdots & 0 \\
+\vdots & \vdots & \ddots & \vdots \\
+0 & 0 & \cdots & (y_d + \gamma)^{(\lambda-1)}
+\end{bmatrix}.
+$$
+
+Therefore the pdf of the multivariate BC-normal distribution is
+
+$$
+f_{BC-MVN}(y; \mu, \Sigma, \lambda, \gamma) = f_{MVN}\left(BC(y; \lambda, \gamma); \mu, \Sigma\right) \cdot \prod_{j = 1}^d (y_j + \gamma)^{(\lambda-1)}
+$$
+
+The log of this density is
+
+$$
+\log\left\{f_{BC-MVN}(y; \mu, \Sigma, \lambda, \gamma)\right\} = \log\left\{f_{MVN}\left(BC(y; \lambda, \gamma); \mu, \Sigma\right)\right\} + (\lambda-1) \sum_{j = 1}^d \log(y_j + \gamma)
+$$
+
