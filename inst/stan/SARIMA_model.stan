@@ -22,6 +22,10 @@ data {
   // boolean for optional state intercept phi_0
   // 1 is to include intercept
   int<lower = 0, upper = 1> include_intercept;
+
+  // boolean for optional constraints for AR process
+  // 1 is to add constraints
+  int<lower = 0, upper = 1> stationary;
 }
 
 transformed data {
@@ -43,16 +47,16 @@ parameters {
   vector[include_intercept] phi_0;
   
   // non-seasonal AR coefficients
-  vector[p_ar] phi;
+  vector[p_ar] unconstrained_phi;
   
   // seasonal AR coefficients
-  vector[P_ar] phi_seasonal;
+  vector[P_ar] unconstrained_phi_seasonal;
 
   // non-seasonal MA coefficients
-  vector[q_ma] theta;
+  vector[q_ma] unconstrained_theta;
   
   // seasonal MA coefficients
-  vector[Q_ma] theta_seasonal;
+  vector[Q_ma] unconstrained_theta_seasonal;
   
   // variance for MA noise terms
   real <lower = 0> var_zeta;
@@ -84,6 +88,24 @@ transformed parameters{
   // initialize dummy_theta to 0s
   vector [r-1] dummy_theta = rep_vector(0, r-1);
   
+  // constrain parameters to stationary and nvertible
+  vector[p_ar] phi;
+  
+  vector[P_ar] phi_seasonal;
+
+  vector[q_ma] theta = constrain_stationary(unconstrained_theta) ;
+  
+  vector[Q_ma] theta_seasonal = constrain_stationary(unconstrained_theta_seasonal);
+  
+  if (stationary) {
+    phi = constrain_stationary(unconstrained_phi);
+    phi_seasonal = constrain_stationary(unconstrained_phi_seasonal);
+  }
+  else {
+    phi = unconstrained_phi;
+    phi_seasonal = unconstrained_phi_seasonal;
+  }
+  
   // set AR coefficient values
   if (p_ar > 0) {
     dummy_phi[1:p_ar] = phi;
@@ -102,8 +124,7 @@ transformed parameters{
       }
     }
   }
-//  print("dummy_phi");
-//  print(dummy_phi);
+  
 
   // set MA coefficient values
   if (q_ma > 0) {
@@ -123,30 +144,24 @@ transformed parameters{
       }
     }
   }
-//  print("dummy_theta");
-//  print(dummy_theta);
+  
 
   // state covariance R in 3.20 of Durbin and Koopman
   R = append_row([[1]], to_matrix(dummy_theta));
-//  print("R");
-//  print(R);
   
   // T in 3.20 of Durbin and Koopman
   T = append_col(dummy_phi,
     append_row(
       diag_matrix(rep_vector(1, m - 1)), to_matrix(rep_row_vector(0, m - 1))));
-//  print("T");
-//  print(T);
   
   // variance for the initial state
   P1 = var_zeta * stationary_cov(T, quad_form_sym(Q, R'));
-//  print("P1");
-//  print(P1);
   
-  if (include_intercept)
+  if (include_intercept) {
     c = append_row(phi_0, rep_vector(0, m - 1));
-  else 
+  } else {
     c = rep_vector(0, m);
+  }
 }
 
 model {

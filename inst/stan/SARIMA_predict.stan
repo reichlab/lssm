@@ -7,6 +7,7 @@ data {
   int<lower=0> p;
   // n obs each is px1
   vector[p] y[n];
+
   // number of lags in non-seasonal auto-regressive part
   int<lower=0> p_ar;
   // number of terms in non-seasonal moving average part
@@ -38,7 +39,7 @@ data {
   vector[p_ar] phi;
   
   vector[P_ar] phi_seasonal;
-  
+
   vector[q_ma] theta;
   
   vector[Q_ma] theta_seasonal;
@@ -56,13 +57,13 @@ data {
   vector[m] a1;
 }
 
-transformed data{
+transformed data {
   // Z in 3.19 of Durbin and Koopman
   matrix[p, m] Z = append_col([[1]], to_matrix(rep_row_vector(0, m - 1)));
   
   // observation covariance
   matrix[p, p] H = [[0]];
-  
+
   // state intercept
   vector[m] c;
   
@@ -110,7 +111,7 @@ transformed data{
       }
     }
   }
-  
+
   // set MA coefficient values
   if (q_ma > 0) {
     dummy_theta[1:q_ma] = theta;
@@ -129,7 +130,7 @@ transformed data{
       }
     }
   }
-  
+
   // state covariance R in 3.20 of Durbin and Koopman
   R = append_row([[1]], to_matrix(dummy_theta));
   
@@ -139,12 +140,13 @@ transformed data{
     diag_matrix(rep_vector(1, m-1)), to_matrix(rep_row_vector(0, m-1))));
   
   // variance for the initial state
-  P1 = var_zeta * stationary_cov(T, quad_form_sym(Q, R '));
+  P1 = var_zeta * stationary_cov(T, quad_form_sym(Q, R'));
   
-  if (include_intercept)
-    c = append_row(phi_0,rep_vector(0, m-1));
-  else 
+  if (include_intercept) {
+    c = append_row(phi_0, rep_vector(0, m - 1));
+  } else{
     c = rep_vector(0, m);
+  }
   
   // shape of result
   if(joint == 0) {
@@ -164,7 +166,7 @@ parameters {
   
 }
 
-generated quantities{
+generated quantities {
   matrix[result_nrow, result_ncol] forecasts[result_length];
   if(joint == 0) {
     forecasts = predict(y, d, Z, H, c, T, R, Q, a1, P1, horizon);
