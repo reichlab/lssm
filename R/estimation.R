@@ -74,9 +74,19 @@ fit_lssm <- function(
 
   # Get fit
   if (model == "arma") {
-    lssm_fit <- fit_arma(y = differenced_y, verbose = verbose, ...)
+    lssm_fit <- fit_sarima_lssm(
+      y = differenced_y,
+      ts_frequency = ts_frequency,
+      verbose = verbose,
+      ...
+    )
   } else if(model == "spline_smoother") {
-    lssm_fit <- fit_spline_smoother(y = differenced_y, verbose = verbose, ...)
+    lssm_fit <- fit_spline_smoother(
+      y = differenced_y,
+      ts_frequency = ts_frequency,
+      verbose = verbose,
+      ...
+    )
   }
 
   # Save information needed for prediction

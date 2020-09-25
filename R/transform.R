@@ -220,50 +220,49 @@ invert_difference_deterministic <- function(dy, y, d, D, frequency) {
 invert_difference_probabilistic <- function(dy, y, d, D, frequency) {
   if(d > 0) {
     # set up matrix encoding un-differencing operation
-    A <- cbind(
-      matrix(0, nrow = length(dy$mean), ncol = 1),
-      diag(length(dy$mean))
-    )
-    A[cbind(seq_along(dy$mean), seq_along(dy$mean))] <- 1
-
+    A <- matrix(0, nrow = length(dy$mean[[1]]), ncol = length(dy$mean[[1]]) + 1)
+    for(i in seq_len(nrow(A))) {
+      A[i, seq_len(i + 1)] <- 1L
+    }
+    
     # augmented covariance with 0s for observed quantities
     sigma_full <- matrix(
       0,
-      nrow = length(dy$mean + 1),
-      ncol = length(dy$mean + 1)
+      nrow = length(dy$mean[[1]]) + 1,
+      ncol = length(dy$mean[[1]]) + 1
     )
     
     for (i in seq_len(d)) {
       y_dm1 <- do_difference(y, d = d - i, D = D, frequency = frequency)
-      mean_full <- c(tail(y_dm1, 1), dy$mean)
-      sigma_full[1 + seq_along(dy$mean), 1 + seq_along(dy$mean)] <- dy$sigma
-      dy$mean <- A %*% mean_full
-      dy$sigma <- emulator::quad.tform(sigma_full, A)
+      mean_full <- c(tail(y_dm1, 1), dy$mean[[1]])
+      sigma_full[1 + seq_along(dy$mean[[1]]), 1 + seq_along(dy$mean[[1]])] <-
+        dy$sigma[[1]]
+      dy$mean[[1]] <- A %*% mean_full
+      dy$sigma[[1]] <- emulator::quad.tform(sigma_full, A)
     }
   }
   
   if(D > 0) {
     # set up matrix encoding un-differencing operation
-    A <- cbind(
-      matrix(0, nrow = length(dy$mean), ncol = frequency),
-      diag(length(dy$mean))
-    )
-    A[cbind(seq_along(dy$mean), seq_along(dy$mean))] <- 1
+    A <- matrix(0, nrow = length(dy$mean[[1]]), ncol = length(dy$mean[[1]]) + frequency)
+    for(i in seq_len(nrow(A))) {
+      A[i, seq(from = i %% frequency, by = frequency, to = i + frequency)] <- 1L
+    }
     
     # augmented covariance with 0s for observed quantities
     sigma_full <- matrix(
       0,
-      nrow = length(dy$mean + frequency),
-      ncol = length(dy$mean + frequency)
+      nrow = length(dy$mean[[1]]) + frequency,
+      ncol = length(dy$mean[[1]]) + frequency
     )
     
     for (i in seq_len(D)) {
       y_dm1 <- do_difference(y, d = 0, D = D - i, frequency = frequency)
-      mean_full <- c(tail(y_dm1, frequency), dy$mean)
-      sigma_full[frequency + seq_along(dy$mean),
-                 frequency + seq_along(dy$mean)] <- dy$sigma
-      dy$mean <- A %*% mean_full
-      dy$sigma <- emulator::quad.tform(sigma_full, A)
+      mean_full <- c(tail(y_dm1, frequency), dy$mean[[1]])
+      sigma_full[frequency + seq_along(dy$mean[[1]]),
+                 frequency + seq_along(dy$mean[[1]])] <- dy$sigma[[1]]
+      dy$mean[[1]] <- A %*% mean_full
+      dy$sigma[[1]] <- emulator::quad.tform(sigma_full, A)
     }
   }
   

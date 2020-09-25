@@ -7,13 +7,15 @@
 using namespace Rcpp;
 
 
-RcppExport SEXP _rcpp_module_boot_stan_fit4ARMA_model_mod();
-RcppExport SEXP _rcpp_module_boot_stan_fit4ARMA_predict_mod();
+RcppExport SEXP _rcpp_module_boot_stan_fit4SARIMA_model_mod();
+RcppExport SEXP _rcpp_module_boot_stan_fit4SARIMA_predict_mod();
+RcppExport SEXP _rcpp_module_boot_stan_fit4d_multi_norm_chol_mod();
 RcppExport SEXP _rcpp_module_boot_stan_fit4functions_mod();
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_rcpp_module_boot_stan_fit4ARMA_model_mod", (DL_FUNC) &_rcpp_module_boot_stan_fit4ARMA_model_mod, 0},
-    {"_rcpp_module_boot_stan_fit4ARMA_predict_mod", (DL_FUNC) &_rcpp_module_boot_stan_fit4ARMA_predict_mod, 0},
+    {"_rcpp_module_boot_stan_fit4SARIMA_model_mod", (DL_FUNC) &_rcpp_module_boot_stan_fit4SARIMA_model_mod, 0},
+    {"_rcpp_module_boot_stan_fit4SARIMA_predict_mod", (DL_FUNC) &_rcpp_module_boot_stan_fit4SARIMA_predict_mod, 0},
+    {"_rcpp_module_boot_stan_fit4d_multi_norm_chol_mod", (DL_FUNC) &_rcpp_module_boot_stan_fit4d_multi_norm_chol_mod, 0},
     {"_rcpp_module_boot_stan_fit4functions_mod", (DL_FUNC) &_rcpp_module_boot_stan_fit4functions_mod, 0},
     {NULL, NULL, 0}
 };

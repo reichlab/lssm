@@ -21,7 +21,7 @@ dlogmvnorm <- function(
   
   log_x <- log(x + offset)
   
-  log_result <- dmvnorm(
+  log_result <- mvtnorm::dmvnorm(
     log_x,
     mean = mean,
     sigma = sigma,
@@ -66,7 +66,7 @@ dbcmvnorm <- function(
     bc_lambda = lambda)
   log_x <- log(x + offset)
   
-  log_result <- dmvnorm(
+  log_result <- mvtnorm::dmvnorm(
     bc_x,
     mean = mean,
     sigma = sigma,
@@ -105,16 +105,19 @@ int_seq <- function(from, to, max_len) {
 #' @param transform_offset 
 #' @param max_d 
 #' @param max_D 
+#' @param include_intercept
 #' @param max_p_ar 
 #' @param max_q_ma 
+#' @param max_P_ar
+#' @param max_Q_ma
 #' @param min_order
 #' @param max_order 
 #' 
 #' @return data frame with columns model, transform, transform_offset, d, D,
-#' p_ar, q_ma
+#' p_ar, q_ma, P_ar, Q_ma
 #' 
 #' @export
-arma_param_grid <- function(
+sarima_param_grid <- function(
   x,
   y,
   len = NULL,
@@ -123,15 +126,18 @@ arma_param_grid <- function(
   transform_offset = if (any(x <= 0)) { -1 * min(x) + 0.49} else { 0.0 },
   max_d = 2,
   max_D = 1,
+  include_intercept = c(FALSE, TRUE),
   max_p_ar = 5,
   max_q_ma = 5,
+  max_P_ar = 2,
+  max_Q_ma = 2,
   min_order = 1,
   max_order = 5
 ) {
   library(lssm)
   
   # Only do seasonal differencing if x has a seasonal period
-  if(frequency(x) < 2) {
+  if(frequency(y) < 2) {
     max_D <- 0
   }
   
@@ -143,13 +149,16 @@ arma_param_grid <- function(
     transform_offset = transform_offset,
     d = int_seq(from = 0, to = max_d, max_len = len),
     D = int_seq(from = 0, to = max_D, max_len = len),
+    include_intercept = include_intercept,
     p_ar = int_seq(from = 0, to = max_p_ar, max_len = len),
     q_ma = int_seq(from = 0, to = max_q_ma, max_len = len),
+    P_ar = int_seq(from = 0, to = max_P_ar, max_len = len),
+    Q_ma = int_seq(from = 0, to = max_Q_ma, max_len = len),
     stringsAsFactors = FALSE
   ) %>%
     dplyr::filter(
-      p_ar + q_ma >= min_order,
-      p_ar + q_ma <= max_order
+      p_ar + q_ma + P_ar + Q_ma >= min_order,
+      p_ar + q_ma + P_ar + Q_ma <= max_order
     )
   
   # If data contains non-positive values, remove grid combinations where the
@@ -220,18 +229,13 @@ predict_lssm_caret_wrapper <- function(
     horizon = nrow(newdata),
     forecast_representation = "named_dist")
   
-  median_forecast <- predict(
-    modelFit,
-    horizon = nrow(newdata),
-    forecast_representation = "quantile",
-    quantile_levels = 0.5
-  )[, 1]
+  dummy_forecast <- rep(0, nrow(newdata))
   
   for(cname in colnames(named_dist_forecast)) {
-    attr(median_forecast, cname) <- named_dist_forecast[[cname]]
+    attr(dummy_forecast, cname) <- named_dist_forecast[[cname]]
   }
   
-  return(median_forecast)
+  return(dummy_forecast)
 }
 
 #' Calculate the log score for forecasts in the format required by caret
@@ -255,7 +259,13 @@ log_score_summary <- function(
   }
   
   dfun <- paste0("d", pred_attrs$family[[1]])
-  call_args <- pred_attrs[!(names(pred_attrs) %in% c("family", "h"))]
+  arg_names <- names(pred_attrs)[!(names(pred_attrs) %in% c("family", "h"))]
+  call_args <- map(
+    arg_names,
+    function(pan) {
+      pred_attrs[[pan]][[1]]
+    }
+  )
   call_args$x <- data$obs
   call_args$log <- TRUE
   
@@ -266,7 +276,7 @@ log_score_summary <- function(
 
 
 #' @export
-lssm_arma_caret <- list(
+lssm_sarima_caret <- list(
   library = "lssm",
   type = "Regression",
   parameters = dplyr::bind_rows(
@@ -301,6 +311,12 @@ lssm_arma_caret <- list(
       stringsAsFactors = FALSE
     ),
     data.frame(
+      parameter = "include_intercept",
+      class = "logical",
+      label = "include_intercept",
+      stringsAsFactors = FALSE
+    ),
+    data.frame(
       parameter = "p_ar",
       class = "numeric",
       label = "p_ar",
@@ -311,9 +327,21 @@ lssm_arma_caret <- list(
       class = "numeric",
       label = "q_ma",
       stringsAsFactors = FALSE
+    ),
+    data.frame(
+      parameter = "P_ar",
+      class = "numeric",
+      label = "p_ar",
+      stringsAsFactors = FALSE
+    ),
+    data.frame(
+      parameter = "Q_ma",
+      class = "numeric",
+      label = "q_ma",
+      stringsAsFactors = FALSE
     )
   ),
-  grid = arma_param_grid,
+  grid = sarima_param_grid,
   fit = fit_lssm_caret_wrapper,
   predict = predict_lssm_caret_wrapper,
   prob = NULL#,

@@ -2,12 +2,12 @@
 
 #include <Rcpp.h>
 using namespace Rcpp ;
-#include "stanExports_ARMA_predict.h"
+#include "stanExports_SARIMA_predict.h"
 
-RCPP_MODULE(stan_fit4ARMA_predict_mod) {
+RCPP_MODULE(stan_fit4SARIMA_predict_mod) {
 
 
-    class_<rstan::stan_fit<stan_model, boost::random::ecuyer1988> >("model_ARMA_predict")
+    class_<rstan::stan_fit<stan_model, boost::random::ecuyer1988> >("model_SARIMA_predict")
 
     .constructor<SEXP,SEXP,SEXP>()
 
