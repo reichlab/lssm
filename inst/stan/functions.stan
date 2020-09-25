@@ -2041,11 +2041,126 @@ functions{
     return ll;
   }
   
+   /**
+  ---
+  function: ssm_updated predicted_cov
+  args:
+  - name: P 
+    description: Variance of the previous state, $P = \Var(\alpha)$. An $m \times m$ matrix.
+  - name: Z
+    description: Design matrix, $\mat{Z}_t$. An array of $p \times m$ matrices.
+  - name: H
+    description: Observation covariance matrix, $\mat{H}_t$. An array of $p \times p$ matrices.
+  returns: Covariance of predicted y at time n+h given n observations.
+  ---
+  Cov(y_{n + h} | Y_n) = Cov(d + Z alpha_{n + h} + epsilon_{n + h}) 
+  = ZPZ' + H = to_symmetric_matrix(quad_form(P, Z') + H)
+  */
+  matrix ssm_update_predicted_cov(matrix P,matrix Z, matrix H){
+    matrix[rows(H), cols(H)] cov_new;
+    cov_new = ssm_update_F(P,Z,H);
+    return cov_new;
+  }
   
-  matrix predict (vector[] y, vector d, matrix Z, matrix H,
+  /**
+  ---
+  function: ssm_updated predicted_mean
+  args:
+  - name: d
+    description: Observation intercept, $\vec{d}_t$. An array of $p \times 1$ vectors.
+  - name: Z
+    description: Design matrix, $\mat{Z}_t$. An array of $p \times m$ matrices.
+  - name: a
+    description: Expected value of the state, $a = \E(\alpha)$. An $m \times 1$ matrix
+  returns: Expected value of predicted y at time n+h given n observations.
+  ---
+  E(y_{n + h} | Y_n) = E(d + Z alpha_{n + h} + epsilon_{n + h}) 
+  = d + Z*a
+  */
+  vector ssm_update_predicted_mean (vector d, matrix Z, vector a){
+    int p = rows(Z);
+    vector [p] mean_new;
+    mean_new = d + Z*a;
+    return mean_new;
+  }
+  
+  /**
+  ---
+  function: ssm_updated predicted_a
+  args:
+  - name: c
+    description: State intercept, $\vec{c}_t$. An array of $m \times 1$ vectors.
+  - name: T
+    description: Transition matrix, $\mat{T}_t$. An array of $m \times m$ matrices.
+  - name: a
+    description: Expected value of the state, $a = \E(\alpha)$. An $m \times 1$ matrix.
+  returns: Expected value of state at time n+h given n observations.
+  ---
+  E[alpha_{n + h} | Y_n] = E[c + T \alpha_{n + h - 1} + R eta_{t + h - 1} | Y_n] 
+  = c + T a_{n + h - 1}
+  */
+  vector ssm_update_predicted_a (vector c, matrix T,vector a){
+    vector[num_elements(a)] a_new;
+    a_new = c+ T*a;
+    return a_new;
+  }
+  
+  /**
+  ---
+  function: ssm_updated predicted_P
+  args:
+  - name: P 
+    description: Variance of the previous state, $P = \Var(\alpha)$. An $m \times m$ matrix.
+  - name: T
+    description: Transition matrix, $\mat{T}_t$. An array of $m \times m$ matrices.
+  - name: RQR
+    description: The $m \times m$ system covarariance matrix, $\mat{R} \mat{Q} \mat{R}\T$.
+  returns: A $m \times m$ covariance matrix for predicted state at time n+h given n observations.
+  --- 
+  Cov(alpha_{n + h} | Y_n) = Cov(c + T \alpha_{n + h - 1} + R eta_{t + h - 1} | Y_n)
+  = TPT' + RQR'
+  */
+  matrix ssm_update_predicted_P (matrix P, matrix T, matrix RQR){
+    matrix[rows(P), cols(P)] P_new;
+    P_new = to_symmetric_matrix(quad_form_sym(P,T')+RQR);
+    return P_new;
+  }
+  
+  
+  /**
+  ---
+  function: predict
+  args:
+  - name: y
+    description: Observations, $\vec{y}_t$. An array of size $n$ of $p \times 1$ vectors.
+  - name: d
+    description: Observation intercept, $\vec{d}_t$. An array of $p \times 1$ vectors.
+  - name: Z
+    description: Design matrix, $\mat{Z}_t$. An array of $p \times m$ matrices.
+  - name: H
+    description: Observation covariance matrix, $\mat{H}_t$. An array of $p \times p$ matrices.
+  - name: c
+    description: State intercept, $\vec{c}_t$. An array of $m \times 1$ vectors.
+  - name: T
+    description: Transition matrix, $\mat{T}_t$. An array of $m \times m$ matrices.
+  - name: R
+    description: State covariance selection matrix, $\mat{R} _t$. An array of $p \times q$ matrices.
+  - name: Q
+    description: State covariance matrix, $\mat{Q}_t$. An array of $q \times q$ matrices.
+  - name: a1
+    description: Expected value of the intial state, $a_1 = \E(\alpha_1)$. An $m \times 1$ matrix.
+  - name: P1
+    description: Variance of the initial state, $P_1 = \Var(\alpha_1)$. An $m \times m$ matrix.
+  - name: horizon
+    description: Number of steps ahead in prediction
+  returns: A $p \times p+1$ matrix containing the mean and variance of predicted $\y_{t+horizon}$. The first folumn is mean.  
+  ---
+  
+  */
+  matrix[] predict (vector[] y, vector d, matrix Z, matrix H,
                       vector c, matrix T, matrix R, matrix Q,
                       vector a1, matrix P1,
-                      int steps_ahead){
+                      int horizon){
     int m = cols(Z);
     int n = size(y);
     int p = rows(Z);
@@ -2053,6 +2168,7 @@ functions{
     vector[m] a;
     matrix[p, p] F;
     matrix[m, m] P;
+    matrix [p, (p+1)] prediction [horizon];
     {
       vector[p] v;
       matrix[p, p] Finv;
@@ -2062,20 +2178,30 @@ functions{
       RQR = quad_form_sym(Q, R ');
       a = a1;
       P = P1;
-      for (t in 1:(n+steps_ahead-1)){
+      # filtering 1--> n
+      for (t in 1:n){
         v = ssm_update_v(y[t], a, d, Z);
         Finv = ssm_update_Finv(P, Z, H);
         K = ssm_update_K(P, Z, T, Finv);
         a = ssm_update_a(a, c, T, v, K);
         P = ssm_update_P(P, Z, T, RQR, K);
+          
       }
-      F = ssm_update_F(P, Z, H);
+      
+      // a_n+1, p_n+1
+      prediction[1]= append_col(to_matrix(ssm_update_predicted_mean(d, Z, a)),ssm_update_predicted_cov(P, Z, H));
+      
+      if (horizon > 1){
+        for (h in 2:horizon){
+            a = ssm_update_predicted_a(c, T, a);
+            P = ssm_update_predicted_P(P,T, RQR);
+            prediction[h]= append_col(to_matrix(ssm_update_predicted_mean(d, Z, a)),ssm_update_predicted_cov(P, Z, H));
+          } 
+      }
     }
     
-    // return p x (p+1)  first col: Z*a 
-    return append_col(to_matrix(Z*a), F);
+    return prediction;
   }
-
 
   /**
   ---
