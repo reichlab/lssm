@@ -157,7 +157,7 @@ Phi = 0.1
 ts_frequency = 4
 #(2,0,0)(1,0,0)4
 fake_data_sarima <- arima.sim(model = list(ar = c(.2, .5, 0, .1,-0.02, -0.05)), n = 200)
-model <- stan_model("inst/stan_models/SARIMA.stan")
+model <- stan_model("inst/stan/SARIMA_model.stan")
 stan_data <- list(
   n = length(fake_data_sarima),
   p = 1,
@@ -167,8 +167,8 @@ stan_data <- list(
   P_ar = 1,
   Q_ma = 0,
   ts_frequency = 4,
-  include_state_intercept = 1,
-  include_obs_intercept = 1
+  include_intercept = 1,
+  stationary = 1
 )
 
 estimate_sarima <- optimizing(model, stan_data)
@@ -185,8 +185,8 @@ stan_data <- list(
   P_ar = 1,
   Q_ma = 0,
   ts_frequency = 4,
-  include_state_intercept = 1,
-  include_obs_intercept = 1,
+  include_intercept = 1,
+  stationary = 1,
   # r = max(p_ar, q_ma+1)
   r = 6,
   # m = r
