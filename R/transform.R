@@ -106,6 +106,44 @@ invert_bc_transform <- function(b, lambda, gamma) {
   return(z - gamma)
 }
 
+#' Invert an initial transformation of time series data.
+#'
+#' @param y a univariate time series or numeric vector.
+#' @param transformation character specifying transformation type:
+#'   "box-cox", "log", or "none".
+#' @param transform_offset numeric offset used before the Box-Cox and log
+#'   transformations; the offset is added to all observations before
+#'   transforming.  Default value of 0.5 allows us to use the Box-Cox and log
+#'   transforms (which require positive inputs) in case of observations of 0,
+#'   and also ensures that the reverse transformed values will always be at
+#'   least -0.5, so that they round up to non-negative values.
+#' @param bc_lambda (required if transformation is "box-cox").  Parameter for
+#'   the Box-Cox transformation.  bc_lambda should be the result of a
+#'   call to car::powerTransform(y + transform_offset, family = "bcPower")
+#'
+#' @return a transformed object of the same class as y
+#'
+#' @export
+invert_initial_transform_probabilistic <- function(
+  y,
+  transformation,
+  transform_offset = 0.5,
+  bc_lambda) {
+  detransformed_y <- y
+  if (identical(transformation, "log")) {
+    detransformed_y$family <- "logmvnorm"
+    detransformed_y$offset <- transform_offset
+  } else if (identical(transformation, "box-cox")) {
+    detransformed_y$family <- "bcmvnorm"
+    detransformed_y$lambda <- bc_lambda
+    detransformed_y$offset <- transform_offset
+  } else if (!identical(transformation, "none")) {
+    stop("Invalid transformation: must be one of 'box-cox', 'log', or 'none'.")
+  }
+  
+  return(detransformed_y)
+}
+
 
 #' Do first-order and seasonal differencing (go from original time series
 #' to differenced time series).

@@ -115,6 +115,13 @@ predict.lssm <- function(
         d = d,
         D = D,
         frequency = ts_frequency)
+      
+      orig_forecast <- invert_initial_transform_probabilistic(
+        y = orig_forecast,
+        transformation = transformation,
+        transform_offset = transform_offset,
+        bc_lambda = bc_lambda
+      )
     } else {
       stop(paste0("Can only invert differencing with a joint forecast ",
         "distribution."))

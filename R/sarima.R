@@ -72,7 +72,8 @@ fit_sarima_lssm <- function(
     q_ma,
     P_ar,
     Q_ma,
-    ts_frequency,
+    stationary = 1L,
+    ts_frequency = 1L,
     init_par,
     verbose = FALSE,
     ...) {
@@ -90,7 +91,8 @@ fit_sarima_lssm <- function(
     q_ma = q_ma,
     P_ar = P_ar,
     Q_ma = Q_ma,
-    ts_frequency = ts_frequency
+    ts_frequency = ts_frequency,
+    stationary = stationary
   )
 
   # initial values for parameter estimation
@@ -101,10 +103,10 @@ fit_sarima_lssm <- function(
     # - [y[1], 0, ..., 0] for the initial state
     init_par <- list(
       phi_0 = rep(0.0, include_intercept),
-      phi = rep(0.0, p_ar),
-      theta = rep(0.0, q_ma),
-      phi_seasonal = rep(0.0, P_ar),
-      theta_seasonal = rep(0.0, Q_ma),
+      unconstrained_phi = rep(0.0, p_ar),
+      unconstrained_theta = rep(0.0, q_ma),
+      unconstrained_phi_seasonal = rep(0.0, P_ar),
+      unconstrained_theta_seasonal = rep(0.0, Q_ma),
       var_zeta = var(y),
       a1 = c(y[1], rep(0.0, max(p_ar + P_ar * ts_frequency,
                                 q_ma + Q_ma * ts_frequency + 1) - 1))
@@ -115,11 +117,15 @@ fit_sarima_lssm <- function(
       stop("initializing parameters with a list is not yet supported.")
     } else {
       init_par <- list(
-        phi_0 = init_pars[grepl("^phi_0\\[", names(init_par))],
-        phi = init_par[grepl("^phi\\[", names(init_par))],
-        phi_seasonal = init_par[grepl("^phi_seasonal\\[", names(init_par))],
-        theta = init_par[grepl("^theta\\[", names(init_par))],
-        theta_seasonal = init_par[grepl("^theta_seasonal\\[", names(init_par))],
+        phi_0 = init_par[grepl("^phi_0\\[", names(init_par))],
+        unconstrained_phi =
+          init_par[grepl("^unconstrained_phi\\[", names(init_par))],
+        unconstrained_phi_seasonal = 
+          init_par[grepl("^unconstrained_phi_seasonal\\[", names(init_par))],
+        unconstrained_theta =
+          init_par[grepl("^unconstrained_theta\\[", names(init_par))],
+        unconstrained_theta_seasonal =
+          init_par[grepl("^unconstrained_theta_seasonal\\[", names(init_par))],
         var_zeta =  init_par["var_zeta"],
         a1 = init_par[grepl("^a1", names(init_par))]
       )
@@ -127,10 +133,10 @@ fit_sarima_lssm <- function(
   }
   dim(init_par$a1) <- length(init_par$a1)
   dim(init_par$phi_0) <- length(init_par$phi_0)
-  dim(init_par$phi) <- length(init_par$phi)
-  dim(init_par$theta) <- length(init_par$theta)
-  dim(init_par$phi_seasonal) <- length(init_par$phi_seasonal)
-  dim(init_par$theta_seasonal) <- length(init_par$theta_seasonal)
+  dim(init_par$unconstrained_phi) <- length(init_par$unconstrained_phi)
+  dim(init_par$unconstrained_theta) <- length(init_par$unconstrained_theta)
+  dim(init_par$unconstrained_phi_seasonal) <- length(init_par$unconstrained_phi_seasonal)
+  dim(init_par$unconstrained_theta_seasonal) <- length(init_par$unconstrained_theta_seasonal)
   
   estimate <- rstan::optimizing(
     object = stanmodels$SARIMA_model,

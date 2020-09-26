@@ -174,7 +174,7 @@ stan_data <- list(
 estimate_sarima <- optimizing(model, stan_data)
 
 # SARIMA predict
-model <- stan_model("inst/stan_models/SARIMA_predict.stan")
+model <- stan_model("inst/stan/SARIMA_predict.stan")
 stan_data <- list(
   n = length(fake_data_sarima),
   p = 1,
@@ -185,14 +185,15 @@ stan_data <- list(
   P_ar = 1,
   Q_ma = 0,
   ts_frequency = 4,
-  include_intercept = 1,
-  stationary = 1,
+  include_intercept = 1L,
+  joint = 1L,
+#  stationary = 1,
   # r = max(p_ar, q_ma+1)
   r = 6,
   # m = r
   m = 6,
   phi_0 = estimate_sarima$par["phi_0[1]"],
-  d_0 = estimate_sarima$par["d_0[1]"],
+  d_0 = numeric(0),
   phi = c(estimate_sarima$par["phi[1]"],estimate_sarima$par["phi[2]"]),
   phi_seasonal = estimate_sarima$par["phi_seasonal[1]"],
   theta = vector(mode = "numeric", length = 0),
@@ -203,7 +204,7 @@ stan_data <- list(
 )
 dim(stan_data$a1) = 6
 dim(stan_data$phi_0) = 1
-dim(stan_data$d_0) = 1
+dim(stan_data$d_0) = 0
 dim(stan_data$phi) = 2
 dim(stan_data$phi_seasonal) = 1
 dim(stan_data$theta) = 0

@@ -11,7 +11,9 @@ fit_sarima_lssm(
   q_ma,
   P_ar,
   Q_ma,
-  ts_frequency,
+  stationary = 1L,
+  ts_frequency = 1L,
+  init_par,
   verbose = FALSE,
   ...
 )
@@ -30,6 +32,8 @@ fit_sarima_lssm(
 \item{Q_ma}{integer order of seasonal moving average terms}
 
 \item{ts_frequency}{integer frequency of time series}
+
+\item{init_par}{initial values for model parameters in estimation}
 
 \item{verbose}{logical: if TRUE, print output from estimation in Stan}
 

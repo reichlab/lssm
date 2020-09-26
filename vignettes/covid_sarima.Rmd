@@ -1,0 +1,160 @@
+---
+title: "covid_sarima"
+author: "Serena Wang"
+date: "9/8/2020"
+output: html_document
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(lssm)
+library(purrr)
+library(dplyr)
+library(ggplot2)
+library(gridExtra)
+library(readr)
+library(covidData)
+library(foreach)
+library(doParallel)
+library(mvtnorm)
+
+registerDoParallel(cores = 4)
+```
+
+```{r}
+deaths_data <- covidData::load_jhu_data(
+    spatial_resolution = c('national'),
+    temporal_resolution = 'daily',
+    measure = "deaths") %>%
+  dplyr::filter(date >= '2020-02-28')
+
+weekdays <- lubridate::wday(lubridate::ymd(deaths_data$date), label = TRUE)
+
+y <- deaths_data$inc
+x <- matrix(y)
+colnames(x) <- "y"
+
+tune_grid <- sarima_param_grid(
+  x = y,
+  y = ts(y, frequency = 7),
+  transformation = "log",
+  transform_offset = 0.49,
+  max_d = 1,
+  max_D = 1,
+  include_intercept = FALSE,
+  max_p_ar = 4,
+  max_q_ma = 4,
+  max_P_ar = 2,
+  max_Q_ma = 2,
+  min_order = 1,
+  max_order = 5,
+  stationary = 1
+)
+
+
+
+tic <- Sys.time()
+crossval_results <- crossvalidate_lssm(
+  y = y,
+  ts_frequency = 7,
+  initial_window = which(weekdays == "Sat")[15],
+  horizon = 4*7,
+  fixed_window = FALSE,
+  crossval_frequency = 7,
+  tune_grid,
+  verbose = FALSE,
+  parallel = TRUE
+)
+toc <- Sys.time()
+toc - tic
+```
+
+```{r}
+crossval_summary <- crossval_results %>%
+  dplyr::group_by_at(.vars = vars(-fold, -log_score, -run_time)) %>%
+  dplyr::summarize(
+    mean_log_score = mean(log_score),
+    sd_log_score = sd(log_score),
+    run_time = sum(run_time)
+  ) %>%
+  dplyr::arrange(desc(mean_log_score))
+```
+
+
+```{r}
+models_to_use <- crossval_summary %>%
+  dplyr::ungroup() %>%
+  dplyr::filter(
+    mean_log_score >= mean_log_score[1] - sd_log_score[1]
+  ) %>%
+  dplyr::select(-mean_log_score, -sd_log_score, -run_time)
+```
+
+```{r}
+forecast_samples <- purrr::map_dfc(
+  seq_len(nrow(models_to_use)),
+  function(model_ind) {
+    param <- as.list(models_to_use[model_ind, ])
+    param$y <- y
+    param$ts_frequency <- 7L
+    param$verbose <- FALSE
+
+    model_fit <- do.call(fit_lssm, param)
+    
+    predict(
+      model_fit,
+      newdata = y,
+      horizon = 4*7,
+      forecast_representation = "sample",
+      nsim = 1000
+    ) %>%
+      as.data.frame()
+  }
+)
+```
+
+```{r}
+plot_data <- data.frame(
+  t = seq_along(y),
+  y = as.vector(y)
+)
+
+point_forecasts <- data.frame(
+  t = length(y) + seq_len(4*7),
+  y_hat = apply(forecast_samples, 1, median)
+)
+
+interval_forecasts <- purrr::map_dfr(
+  c(0.025, 0.1, 0.25),
+  function(alpha) {
+    data.frame(
+      t = length(y) + seq_len(4*7),
+      lower = apply(forecast_samples, 1, quantile, p = alpha),
+      upper = apply(forecast_samples, 1, quantile, p = 1 - alpha),
+      level = 1 - 2 * alpha
+    )
+  }
+)
+interval_forecasts$level <- factor(
+  interval_forecasts$level,
+  levels = c(0.95, 0.8, 0.5)
+)
+
+ggplot() +
+  geom_line(data = plot_data, mapping = aes(x = t, y = y)) +
+  geom_ribbon(
+    data = interval_forecasts,
+    mapping = aes(x = t, ymin = lower, ymax = upper, fill = level)
+  ) +
+  geom_line(
+    data = point_forecasts,
+    mapping = aes(x = t, y = y_hat)
+  ) +
+  theme_bw()
+```

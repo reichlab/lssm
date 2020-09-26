@@ -95,92 +95,6 @@ int_seq <- function(from, to, max_len) {
     floor()
 }
 
-#' Define grid of tuning parameters for the arma model
-#' 
-#' @param x 
-#' @param y 
-#' @param len 
-#' @param search 
-#' @param transform 
-#' @param transform_offset 
-#' @param max_d 
-#' @param max_D 
-#' @param include_intercept
-#' @param max_p_ar 
-#' @param max_q_ma 
-#' @param max_P_ar
-#' @param max_Q_ma
-#' @param min_order
-#' @param max_order 
-#' 
-#' @return data frame with columns model, transform, transform_offset, d, D,
-#' p_ar, q_ma, P_ar, Q_ma
-#' 
-#' @export
-sarima_param_grid <- function(
-  x,
-  y,
-  len = NULL,
-  search = "grid",
-  transformation = "box-cox",
-  transform_offset = if (any(x <= 0)) { -1 * min(x) + 0.49} else { 0.0 },
-  max_d = 2,
-  max_D = 1,
-  include_intercept = c(FALSE, TRUE),
-  max_p_ar = 5,
-  max_q_ma = 5,
-  max_P_ar = 2,
-  max_Q_ma = 2,
-  min_order = 1,
-  max_order = 5
-) {
-  library(lssm)
-  
-  # Only do seasonal differencing if x has a seasonal period
-  if(frequency(y) < 2) {
-    max_D <- 0
-  }
-  
-  # For grid search, all combinations of d, D, p_ar, and q_ma satisfying
-  # p_ar + q_ma <= max_order
-  out <- expand.grid(
-    model = "arma",
-    transformation = transformation,
-    transform_offset = transform_offset,
-    d = int_seq(from = 0, to = max_d, max_len = len),
-    D = int_seq(from = 0, to = max_D, max_len = len),
-    include_intercept = include_intercept,
-    p_ar = int_seq(from = 0, to = max_p_ar, max_len = len),
-    q_ma = int_seq(from = 0, to = max_q_ma, max_len = len),
-    P_ar = int_seq(from = 0, to = max_P_ar, max_len = len),
-    Q_ma = int_seq(from = 0, to = max_Q_ma, max_len = len),
-    stringsAsFactors = FALSE
-  ) %>%
-    dplyr::filter(
-      p_ar + q_ma + P_ar + Q_ma >= min_order,
-      p_ar + q_ma + P_ar + Q_ma <= max_order
-    )
-  
-  # If data contains non-positive values, remove grid combinations where the
-  # transformation is log or box-cox and the transform_offset is less than or
-  # equal to the smallest data value
-  min_data <- min(c(x, y))
-  if(min_data <= 0) {
-    out <- out %>%
-      dplyr::filter(
-        !(transformation %in% c("log", "box-cox") &
-            transform_offset <= min_data)
-      )
-  }
-  
-  if (search == "random") {
-    # select a random set of rows from the grid defined above
-    out <- out %>%
-      dplyr::sample_n(size = len)
-  }
-  
-  return(out)
-}
 
 
 #' Wrapper around fit_lssm for use with caret::train
@@ -275,75 +189,75 @@ log_score_summary <- function(
 }
 
 
-#' @export
-lssm_sarima_caret <- list(
-  library = "lssm",
-  type = "Regression",
-  parameters = dplyr::bind_rows(
-    data.frame(
-      parameter = "model",
-      class = "character",
-      label = "model",
-      stringsAsFactors = FALSE
-    ),
-    data.frame(
-      parameter = "transformation",
-      class = "character",
-      label = "transformation",
-      stringsAsFactors = FALSE
-    ),
-    data.frame(
-      parameter = "transform_offset",
-      class = "numeric",
-      label = "transform_offset",
-      stringsAsFactors = FALSE
-    ),
-    data.frame(
-      parameter = "d",
-      class = "numeric",
-      label = "d",
-      stringsAsFactors = FALSE
-    ),
-    data.frame(
-      parameter = "D",
-      class = "numeric",
-      label = "D",
-      stringsAsFactors = FALSE
-    ),
-    data.frame(
-      parameter = "include_intercept",
-      class = "logical",
-      label = "include_intercept",
-      stringsAsFactors = FALSE
-    ),
-    data.frame(
-      parameter = "p_ar",
-      class = "numeric",
-      label = "p_ar",
-      stringsAsFactors = FALSE
-    ),
-    data.frame(
-      parameter = "q_ma",
-      class = "numeric",
-      label = "q_ma",
-      stringsAsFactors = FALSE
-    ),
-    data.frame(
-      parameter = "P_ar",
-      class = "numeric",
-      label = "p_ar",
-      stringsAsFactors = FALSE
-    ),
-    data.frame(
-      parameter = "Q_ma",
-      class = "numeric",
-      label = "q_ma",
-      stringsAsFactors = FALSE
-    )
-  ),
-  grid = sarima_param_grid,
-  fit = fit_lssm_caret_wrapper,
-  predict = predict_lssm_caret_wrapper,
-  prob = NULL#,
-#  sort = sort_arma_params
-)
+# #' @export
+# lssm_sarima_caret <- list(
+#   library = "lssm",
+#   type = "Regression",
+#   parameters = dplyr::bind_rows(
+#     data.frame(
+#       parameter = "model",
+#       class = "character",
+#       label = "model",
+#       stringsAsFactors = FALSE
+#     ),
+#     data.frame(
+#       parameter = "transformation",
+#       class = "character",
+#       label = "transformation",
+#       stringsAsFactors = FALSE
+#     ),
+#     data.frame(
+#       parameter = "transform_offset",
+#       class = "numeric",
+#       label = "transform_offset",
+#       stringsAsFactors = FALSE
+#     ),
+#     data.frame(
+#       parameter = "d",
+#       class = "numeric",
+#       label = "d",
+#       stringsAsFactors = FALSE
+#     ),
+#     data.frame(
+#       parameter = "D",
+#       class = "numeric",
+#       label = "D",
+#       stringsAsFactors = FALSE
+#     ),
+#     data.frame(
+#       parameter = "include_intercept",
+#       class = "logical",
+#       label = "include_intercept",
+#       stringsAsFactors = FALSE
+#     ),
+#     data.frame(
+#       parameter = "p_ar",
+#       class = "numeric",
+#       label = "p_ar",
+#       stringsAsFactors = FALSE
+#     ),
+#     data.frame(
+#       parameter = "q_ma",
+#       class = "numeric",
+#       label = "q_ma",
+#       stringsAsFactors = FALSE
+#     ),
+#     data.frame(
+#       parameter = "P_ar",
+#       class = "numeric",
+#       label = "p_ar",
+#       stringsAsFactors = FALSE
+#     ),
+#     data.frame(
+#       parameter = "Q_ma",
+#       class = "numeric",
+#       label = "q_ma",
+#       stringsAsFactors = FALSE
+#     )
+#   ),
+#   grid = sarima_param_grid,
+#   fit = fit_lssm_caret_wrapper,
+#   predict = predict_lssm_caret_wrapper,
+#   prob = NULL#,
+# #  sort = sort_arma_params
+# )

@@ -11,6 +11,19 @@ functions{
   matrix to_symmetric_matrix(matrix x) {
     return 0.5 * (x + x ');
   }
+  
+    /**
+  function: to_spd_matrix
+  args:
+    - name: x
+      description: An $n \times n$ matrix
+  returns: An $n \times n$ symmetric and positive matrix, $0.5 (x + x') + eps * I$.
+  ---
+  Ensure a matrix is symmetric
+  */
+  matrix to_spd_matrix(matrix x) {
+    return add_diag(0.5 * (x + x '), 0.00000001);
+  }
 
   /**
   ---
@@ -903,7 +916,7 @@ functions{
   matrix ssm_update_Finv(matrix P, matrix Z, matrix H) {
     matrix[rows(H), cols(H)] Finv;
     // if can guarantee that F is spd, then take spd inverse.
-    Finv = inverse_spd(to_symmetric_matrix(quad_form(P, Z') + H));
+    Finv = inverse_spd(to_spd_matrix(quad_form(P, Z') + H));
     // Finv = inverse(quad_form(P, Z') + H);
     return Finv;
   }

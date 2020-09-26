@@ -43,17 +43,19 @@ represent_forecasts <- function(
     family_col_ind <- which(colnames(named_dist_forecast) == "family")
     param_cols <- family_col_ind +
       seq_len(ncol(named_dist_forecast) - family_col_ind)
-    forecast <- matrix(
-      NA_real_,
-      nrow = nrow(named_dist_forecast),
-      ncol = nsim)
+    
+    arg_names <- colnames(named_dist_forecast)[param_cols]
+    call_args <- map(
+      arg_names,
+      function(pan) {
+        named_dist_forecast[[pan]][[1]]
+      }
+    )
+    names(call_args) <- arg_names
+    call_args$n <- nsim
+    
+    forecast <- t(do.call(what = fun_name, args = call_args))
     colnames(forecast) <- paste0("sample_", seq_len(nsim))
-
-    for (h in seq_len(nrow(named_dist_forecast))) {
-      call_args <- as.list(named_dist_forecast[h, param_cols])
-      call_args$n <- nsim
-      forecast[h, ] <- do.call(what = fun_name, args = call_args)
-    }
   } else if (forecast_representation == "quantile") {
     fun_name <- paste0("q", named_dist_forecast$family[1])
     family_col_ind <- which(colnames(named_dist_forecast) == "family")
