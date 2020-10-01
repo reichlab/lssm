@@ -45,7 +45,7 @@ represent_forecasts <- function(
       seq_len(ncol(named_dist_forecast) - family_col_ind)
     
     arg_names <- colnames(named_dist_forecast)[param_cols]
-    call_args <- map(
+    call_args <- purrr::map(
       arg_names,
       function(pan) {
         named_dist_forecast[[pan]][[1]]

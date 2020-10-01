@@ -1,6 +1,5 @@
 #' Define grid of tuning parameters for the arma model
 #' 
-#' @param x 
 #' @param y 
 #' @param len 
 #' @param search 
@@ -22,7 +21,6 @@
 #' 
 #' @export
 sarima_param_grid <- function(
-  x,
   y,
   len = NULL,
   search = "grid",
@@ -41,7 +39,7 @@ sarima_param_grid <- function(
 ) {
   library(lssm)
   
-  # Only do seasonal differencing if x has a seasonal period
+  # Only do seasonal differencing if y has a seasonal period
   if(frequency(y) < 2) {
     max_D <- 0
   }
@@ -70,7 +68,7 @@ sarima_param_grid <- function(
   # If data contains non-positive values, remove grid combinations where the
   # transformation is log or box-cox and the transform_offset is less than or
   # equal to the smallest data value
-  min_data <- min(c(x, y))
+  min_data <- min(y)
   if(min_data <= 0) {
     out <- out %>%
       dplyr::filter(
@@ -96,14 +94,15 @@ crossvalidate_lssm <- function(
   y,
   ts_frequency,
   initial_window = 150,
-  horizon = 1,
+  crossval_start_horizon = 1,
+  crossval_end_horizon = 1,
   fixed_window = FALSE,
   crossval_frequency = 1,
   tune_grid,
   verbose = TRUE,
   parallel = FALSE
 ) {
-  if(parallel && foreach::getDoParWorkers() > 1) {
+  if (parallel && foreach::getDoParWorkers() > 1) {
     `%do_op%` <- `%dopar%`
   } else {
     `%do_op%` <- `%do%`
@@ -113,15 +112,21 @@ crossvalidate_lssm <- function(
   crossval_folds <- caret::createTimeSlices(
     y,
     initialWindow = initial_window,
-    horizon = horizon,
+    horizon = crossval_end_horizon,
     fixedWindow = fixed_window)
-  if(crossval_frequency != 1) {
+  crossval_horizon_inds <- seq(
+    from = crossval_start_horizon, to = crossval_end_horizon)
+  if (crossval_frequency != 1) {
     subset_inds <- seq(
       from = 1,
       by = crossval_frequency,
       to = length(crossval_folds$train))
     crossval_folds$train <- crossval_folds$train[subset_inds]
-    crossval_folds$test <- crossval_folds$test[subset_inds]
+    crossval_folds$test <- lapply(
+      crossval_folds$test[subset_inds],
+      function(inds) {
+        inds[crossval_horizon_inds]
+      })
   }
   
   # Cross-validate each model specification in parallel
@@ -148,8 +153,8 @@ crossvalidate_lssm <- function(
     init_par <- NULL
     
     # Iterate through folds and obtain log score for each.
-    for(fold_ind in seq_along(crossval_folds$train)) {
-      if(verbose) {
+    for (fold_ind in seq_along(crossval_folds$train)) {
+      if (verbose) {
         print(paste0("Estimating fold ", fold_ind, " of ", length(crossval_folds$train),
                      " for model ", model_ind, " of ", nrow(tune_grid)))
       }
@@ -173,19 +178,22 @@ crossvalidate_lssm <- function(
       # validation set predictions
       named_dist_forecast <- predict(
         model_fit,
-        horizon = horizon,
+        horizon = crossval_end_horizon,
         forecast_representation = "named_dist")
       
       # log score for validation set predictions
       dfun <- paste0("d", named_dist_forecast$family[[1]])
       arg_names <- names(named_dist_forecast)[
         !(names(named_dist_forecast) %in% c("family", "h"))]
-      call_args <- map(
+      call_args <- purrr::map(
         arg_names,
         function(pan) {
           named_dist_forecast[[pan]][[1]]
         }
       )
+      call_args$mean <- call_args$mean[crossval_horizon_inds]
+      call_args$sigma <- call_args$sigma[
+        crossval_horizon_inds, crossval_horizon_inds]
       call_args$x <- y[crossval_folds$test[[fold_ind]]]
       call_args$log <- TRUE
       

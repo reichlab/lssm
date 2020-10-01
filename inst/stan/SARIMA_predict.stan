@@ -54,7 +54,7 @@ data {
   int<lower=0> m;
   
   // expected value for the initial state
-  vector[m] a1;
+//  vector[m] a1;
 }
 
 transformed data {
@@ -79,7 +79,9 @@ transformed data {
   matrix[m, m] T;
   matrix[m, 1] R;
   
-  // covariance of initial state
+  // covariance of state at times 0 and 1
+  vector[m] a0 = rep_vector(0, m);
+  vector[m] a1;
   matrix[m, m] P1;
   
   // initialize dummy_phi to 0s
@@ -147,6 +149,10 @@ transformed data {
   } else{
     c = rep_vector(0, m);
   }
+
+  // expected value and covariance of forecast distribution for state at time 1
+  a1 = ssm_update_predicted_a(c, T, a0);
+  P1 = ssm_update_predicted_P(P1, T, quad_form_sym(Q, R'));
   
   // shape of result
   if(joint == 0) {

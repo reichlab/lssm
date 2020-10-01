@@ -60,6 +60,8 @@ new_sarima_lssm <- function(
 #' @param ts_frequency integer frequency of time series
 #' @param init_par initial values for model parameters in estimation
 #' @param verbose logical: if TRUE, print output from estimation in Stan
+#' @param horizon integer: 0 means maximum likelihood, a positive value means
+#' optimization targets the log score of predictions at horizon steps ahead
 #' @param ... other arguments are ignored
 #'
 #' @return sarima_lssm fit object
@@ -76,6 +78,7 @@ fit_sarima_lssm <- function(
     ts_frequency = 1L,
     init_par,
     verbose = FALSE,
+    horizon = 0L,
     ...) {
   
   # drop leading NA's that may have resulted from differencing
@@ -92,7 +95,8 @@ fit_sarima_lssm <- function(
     P_ar = P_ar,
     Q_ma = Q_ma,
     ts_frequency = ts_frequency,
-    stationary = stationary
+    stationary = stationary,
+    horizon = horizon
   )
 
   # initial values for parameter estimation
@@ -240,9 +244,9 @@ predict.sarima_lssm <- function(
   
   raw_prediction <- stan_output$theta_tilde[,
     grepl("^forecasts\\[", colnames(stan_output$theta_tilde))]
-  dim(raw_prediction) <- c(horizon, horizon + 1)
   
   if(joint) {
+    dim(raw_prediction) <- c(horizon, horizon + 1)
     named_dist_forecast <- tibble(
       h = list(seq_len(horizon)),
       family = "mvnorm",
@@ -252,11 +256,12 @@ predict.sarima_lssm <- function(
       )
     )
   } else {
+    dim(raw_prediction) <- c(horizon, 2)
     named_dist_forecast <- data.frame(
       h = seq_len(horizon),
       family = "norm",
-      mean = raw_prediction[1, 1, 1],
-      sd = sqrt(raw_prediction[1, 1, 2]),
+      mean = raw_prediction[, 1],
+      sd = sqrt(raw_prediction[, 2]),
       stringsAsFactors = FALSE
     )
   }

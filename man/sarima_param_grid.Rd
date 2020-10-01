@@ -5,7 +5,6 @@
 \title{Define grid of tuning parameters for the arma model}
 \usage{
 sarima_param_grid(
-  x,
   y,
   len = NULL,
   search = "grid",
@@ -24,8 +23,6 @@ sarima_param_grid(
 )
 }
 \arguments{
-\item{x}{}
-
 \item{y}{}
 
 \item{len}{}

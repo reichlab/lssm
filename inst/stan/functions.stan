@@ -2216,6 +2216,38 @@ functions{
     return prediction;
   }
 
+
+  matrix[] predict_given_one_step (vector[] y, vector d, matrix Z, matrix H,
+                      vector c, matrix T, matrix R, matrix Q,
+                      vector a1, matrix P1,
+                      int horizon){
+    int m = cols(Z);
+    int n = size(y);
+    int p = rows(Z);
+    
+    vector[m] a = a1;
+    matrix[m, m] P = P1;
+    matrix [p, (p+1)] prediction [horizon];
+    {
+      matrix[m, m] RQR;
+
+      RQR = quad_form_sym(Q, R ');
+      
+      // a_n+1, p_n+1
+      prediction[1]= append_col(to_matrix(ssm_update_predicted_mean(d, Z, a)),ssm_update_predicted_cov(P, Z, H));
+      
+      if (horizon > 1) {
+        for (h in 2:horizon) {
+            a = ssm_update_predicted_a(c, T, a);
+            P = ssm_update_predicted_P(P,T, RQR);
+            prediction[h]= append_col(to_matrix(ssm_update_predicted_mean(d, Z, a)),ssm_update_predicted_cov(P, Z, H));
+          } 
+      }
+    }
+    
+    return prediction;
+  }
+
   /**
   ---
   function: ssm_constant_joint_predict
@@ -2324,7 +2356,206 @@ functions{
       quad_form_sym(Q_star, ZT_tilde') + H_tilde
     );
   }
+
+  // joint prediction over next horizon time steps given one step ahead mean and covariance
+  matrix ssm_constant_joint_predict_given_one_step(vector[] y,
+                          vector d, matrix Z, matrix H,
+                          vector c, matrix T, matrix R, matrix Q,
+                          vector a1, matrix P1, int horizon) {
+    // variable declarations
+    int m = cols(Z);
+    int n = size(y);
+    int p = rows(Z);
+    
+    vector[p*horizon] d_tilde;
+    vector[m*horizon] a_star = rep_vector(0, m*horizon);
+    matrix[p*horizon, p*horizon] H_tilde = rep_matrix(0, p*horizon, p*horizon);
+    
+    vector[m*horizon] c_tilde = rep_vector(0, m*horizon);
+    matrix[p*horizon, m*horizon] ZT_tilde =
+      rep_matrix(0, p*horizon, m*horizon);
+    matrix[m*horizon, m*horizon] Q_star =
+      rep_matrix(0, m*horizon, m*horizon);
+    matrix[m, m] RQR = quad_form_sym(Q, R');
+    
+    // run Kalman filter to get predicted state and predictive covariance for
+    // horizon 1
+    vector[m] a;
+    matrix[m, m] P;
+    {
+      vector[p] v;
+      matrix[p, p] Finv;
+      matrix[m, p] K;
+
+      a = a1;
+      P = P1;
+      for (t in 1:n) {
+        v = ssm_update_v(y[t], a, d, Z);
+        Finv = ssm_update_Finv(P, Z, H);
+        K = ssm_update_K(P, Z, T, Finv);
+        a = ssm_update_a(a, c, T, v, K);
+        P = ssm_update_P(P, Z, T, RQR, K);
+      }
+    }
+    
+    // set up full matrices to represent system over horizon time steps
+    {
+      matrix[p, m] ZT = Z;
+      
+      a_star[1:m] = a;
+      
+      for (h in 1:horizon) {
+        d_tilde[((h - 1) * p + 1):(h * p)] = d;
+        if (h > 1) {
+          c_tilde[((h - 1) * m + 1):(h * m)] = c;
+          ZT = ZT * T;
+        }
+        
+        H_tilde[((h - 1) * p + 1):(h * p), ((h - 1) * p + 1):(h * p)] = H;
+        
+        for (i in 1:(horizon - h + 1)) {
+          ZT_tilde[((i + h - 2) * p + 1):((i + h -  1) * p), ((i - 1) * m + 1):(i * m)] = ZT;
+        }
+      }
+    }
+    
+    Q_star[1:m, 1:m] = P;
+    if (horizon > 1) {
+      for (h in 2:horizon) {
+        Q_star[((h - 1) * m + 1):(h * m), ((h - 1) * m + 1):(h * m)] = RQR;
+      }
+    }
+//    print("Q_star = ");
+//    print(Q_star);
+    
+    return append_col(
+      to_matrix(d_tilde) + ZT_tilde * to_matrix(c_tilde + a_star),
+      quad_form_sym(Q_star, ZT_tilde') + H_tilde
+    );
+  }
+
+
+
+  /**
+  ---
+  function: ssm_constant_lpdf
+  args:
+  - name: y
+    description: Observations, $\vec{y}_t$. An array of size $n$ of $p \times 1$ vectors.
+  - name: d
+    description: Observation intercept, $\vec{d}_t$. An array of $p \times 1$ vectors.
+  - name: Z
+    description: Design matrix, $\mat{Z}_t$. An array of $p \times m$ matrices.
+  - name: H
+    description: Observation covariance matrix, $\mat{H}_t$. An array of $p \times p$ matrices.
+  - name: c
+    description: State intercept, $\vec{c}_t$. An array of $m \times 1$ vectors.
+  - name: T
+    description: Transition matrix, $\mat{T}_t$. An array of $m \times m$ matrices.
+  - name: R
+    description: State covariance selection matrix, $\mat{R} _t$. An array of $p \times q$ matrices.
+  - name: Q
+    description: State covariance matrix, $\mat{Q}_t$. An array of $q \times q$ matrices.
+  - name: a1
+    description: Expected value of the intial state, $a_1 = \E(\alpha_1)$. An $m \times 1$ matrix.
+  - name: P1
+    description: Variance of the initial state, $P_1 = \Var(\alpha_1)$. An $m \times m$ matrix.
+  returns: The log-likelihood, $p(\vec{y}_{1:n} | \vec{d}, \mat{Z}, \mat{H}, \vec{c}, \mat{T}, \mat{R}, \mat{Q})$, marginalized over the latent states.
+  ---
   
+  Log-likelihood of a Time-Invariant Linear Gaussian State Space Model
+  
+  
+  Unlike `ssm_filter`, this function requires the system matrices (`d`, `Z`, `H`, `c`, `T`, `R`, `Q`)
+  to all be time invariant (constant).
+  When the state space model is time-invariant, then the Kalman recursion for $\mat{P}_t$ converges.
+  This function takes advantage of this feature and stops updating $\mat{P}_t$ after it converges
+  to a steady state.
+  
+  */
+  real ssm_constant_forecast_lpdf(vector[] y,
+                          vector d, matrix Z, matrix H,
+                          vector c, matrix T, matrix R, matrix Q,
+                          vector a1, matrix P1, int horizon) {
+    real ll = 0.0;
+    int n;
+    int m;
+    int p;
+  
+    n = size(y); // number of obs
+    m = cols(Z);
+    p = rows(Z);
+    {
+      vector[n - horizon] ll_pred;
+      vector[m] a;
+      vector[m] a_temp;
+      matrix[m, m] P;
+      matrix[m, m] P_temp;
+      vector[p] v;
+      matrix[p, p] Finv;
+      matrix[m, p] K;
+      matrix[m, m] RQR;
+      matrix [p, (p+1)] full_prediction [horizon];
+      // indicator for if the filter has converged
+      // This only works for time-invariant state space models
+      int converged;
+      matrix[m, m] P_old;
+      real tol;
+      real matdiff;
+      converged = 0;
+      tol = 1e-7;
+  
+      RQR = quad_form_sym(Q, R ');
+      a = a1;
+      P = P1;
+      for (t in 1:(n - horizon)) {
+        v = ssm_update_v(y[t], a, d, Z);
+        if (converged < 1) {
+          Finv = ssm_update_Finv(P, Z, H);
+          K = ssm_update_K(P, Z, T, Finv);
+        }
+
+        // find predictive mean and covariance at time t + horizon
+        // a_n+horizon, p_n+horizon
+//        a_temp = a;
+//        P_temp = P;
+//        for (h in 1:horizon) {
+//          a_temp = ssm_update_predicted_a(c, T, a_temp);
+//          if (converged < 1) {
+//            P_temp = ssm_update_predicted_P(P_temp, T, RQR);
+//          }
+//        }
+//        ll += multi_normal_lpdf(y[t + horizon] | ssm_update_predicted_mean(d, Z, a_temp), ssm_update_predicted_cov(P_temp, Z, H));
+        full_prediction = predict_given_one_step(y, d, Z, H, c, T, R, Q, a, P, horizon);
+        ll += multi_normal_lpdf(y[t + horizon] | full_prediction[horizon, 1:p, 1], full_prediction[horizon, 1:p, 2:(p + 1)]);
+        print("t = ");
+        print(t);
+        print("mean = ");
+        print(full_prediction[horizon, 1:p, 1]);
+        print("cov = ");
+        print(full_prediction[horizon, 1:p, 2:(p + 1)]);
+        print("ls = ");
+        print(multi_normal_lpdf(y[t + horizon] | full_prediction[horizon, 1:p, 1], full_prediction[horizon, 1:p, 2:(p + 1)]));
+
+        // don't save a, P for last iteration
+        if (t < n - horizon) {
+          a = ssm_update_a(a, c, T, v, K);
+          // check for convergence
+          // should only check for convergence if there are no missing values
+          if (converged < 1) {
+            P_old = P;
+            P = ssm_update_P(P, Z, T, RQR, K);
+            matdiff = matrix_diff(P, P_old);
+            if (matdiff < tol) {
+              converged = 1;
+            }
+          }
+        }
+      }
+    }
+    return ll;
+  }
+
 
   /**
   

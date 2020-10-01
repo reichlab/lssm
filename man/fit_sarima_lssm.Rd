@@ -15,6 +15,7 @@ fit_sarima_lssm(
   ts_frequency = 1L,
   init_par,
   verbose = FALSE,
+  horizon = 0L,
   ...
 )
 }
@@ -36,6 +37,9 @@ fit_sarima_lssm(
 \item{init_par}{initial values for model parameters in estimation}
 
 \item{verbose}{logical: if TRUE, print output from estimation in Stan}
+
+\item{horizon}{integer: 0 means maximum likelihood, a positive value means
+optimization targets the log score of predictions at horizon steps ahead}
 
 \item{...}{other arguments are ignored}
 }

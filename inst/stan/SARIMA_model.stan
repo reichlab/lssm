@@ -26,6 +26,12 @@ data {
   // boolean for optional constraints for AR process
   // 1 is to add constraints
   int<lower = 0, upper = 1> stationary;
+
+  // horizon targeted for estimation
+  // 0 means maximum likelihood estimation
+  // horizon > 0 calculates the log score of the predictive distribution at the
+  // specified horizon
+  int<lower = 0> horizon;
 }
 
 transformed data {
@@ -40,6 +46,9 @@ transformed data {
   
   // observation covariance
   matrix[p, p] H = [[0]];
+
+  // expected value for the state at time 0
+  vector[m] a0 = rep_vector(0, m);
 }
 
 parameters {
@@ -62,7 +71,7 @@ parameters {
   real <lower = 0> var_zeta;
   
   // expected value for the initial state
-  vector[m] a1;
+//  vector[m] a1;
 }
 
 transformed parameters{
@@ -78,8 +87,11 @@ transformed parameters{
   // update matrices for state
   matrix[m,m] T;
   matrix[m,1] R;
-  
-  // covariance of initial state
+
+  // expected value of state at time 1
+  vector[m] a1;
+
+  // covariance of state at time 1
   matrix[m,m] P1;
   
   // initialize dummy_phi to 0s
@@ -154,16 +166,25 @@ transformed parameters{
     append_row(
       diag_matrix(rep_vector(1, m - 1)), to_matrix(rep_row_vector(0, m - 1))));
   
-  // variance for the initial state
+  // variance for the state at time 0
   P1 = var_zeta * stationary_cov(T, quad_form_sym(Q, R'));
   
+  // intercept for state transitions
   if (include_intercept) {
     c = append_row(phi_0, rep_vector(0, m - 1));
   } else {
     c = rep_vector(0, m);
   }
+
+  // expected value and covariance of forecast distribution for state at time 1
+  a1 = ssm_update_predicted_a(c, T, a0);
+  P1 = ssm_update_predicted_P(P1, T, quad_form_sym(Q, R'));
 }
 
 model {
-  target += ssm_constant_lpdf(y | d, Z, H, c, T, R, Q, a1, P1);
+  if(horizon == 0) {
+    target += ssm_constant_lpdf(y | d, Z, H, c, T, R, Q, a1, P1);
+  } else {
+    target += ssm_constant_forecast_lpdf(y | d, Z, H, c, T, R, Q, a1, P1, horizon);
+  }
 }
