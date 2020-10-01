@@ -41,7 +41,6 @@ x <- matrix(y)
 colnames(x) <- "y"
 
 tune_grid <- sarima_param_grid(
-  x = y,
   y = ts(y, frequency = 7),
   transformation = "log",
   transform_offset = 0.49,
@@ -64,7 +63,8 @@ crossval_results <- crossvalidate_lssm(
   y = y,
   ts_frequency = 7,
   initial_window = which(weekdays == "Sat")[15],
-  horizon = 4*7,
+  crossval_start_horizon = 1,
+  crossval_end_horizon = 4*7,
   fixed_window = FALSE,
   crossval_frequency = 7,
   tune_grid,
