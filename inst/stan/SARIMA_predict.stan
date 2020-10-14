@@ -1,4 +1,6 @@
-#include functions.stan
+functions{
+#include lib/functions.stan
+}
 
 data {
   // number of observations

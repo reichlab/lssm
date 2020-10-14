@@ -1,4 +1,4 @@
-functions{
+//functions{
   /**
   function: to_symmetric_matrix
   args:
@@ -2526,19 +2526,9 @@ functions{
 //          }
 //        }
 //        ll += multi_normal_lpdf(y[t + horizon] | ssm_update_predicted_mean(d, Z, a_temp), ssm_update_predicted_cov(P_temp, Z, H));
-        full_prediction = predict_given_one_step(y, d, Z, H, c, T, R, Q, a, P, horizon);
-        ll += multi_normal_lpdf(y[t + horizon] | full_prediction[horizon, 1:p, 1], full_prediction[horizon, 1:p, 2:(p + 1)]);
-        print("t = ");
-        print(t);
-        print("mean = ");
-        print(full_prediction[horizon, 1:p, 1]);
-        print("cov = ");
-        print(full_prediction[horizon, 1:p, 2:(p + 1)]);
-        print("ls = ");
-        print(multi_normal_lpdf(y[t + horizon] | full_prediction[horizon, 1:p, 1], full_prediction[horizon, 1:p, 2:(p + 1)]));
 
         // don't save a, P for last iteration
-        if (t < n - horizon) {
+        //if (t < n - horizon) {
           a = ssm_update_a(a, c, T, v, K);
           // check for convergence
           // should only check for convergence if there are no missing values
@@ -2550,7 +2540,17 @@ functions{
               converged = 1;
             }
           }
-        }
+        //}
+        full_prediction = predict_given_one_step(y, d, Z, H, c, T, R, Q, a, P, horizon);
+        ll += multi_normal_lpdf(y[t + horizon] | full_prediction[horizon, 1:p, 1], full_prediction[horizon, 1:p, 2:(p + 1)]);
+        //print("t = ");
+        //print(t);
+        //print("mean = ");
+        //print(full_prediction[horizon, 1:p, 1]);
+        //print("cov = ");
+        //print(full_prediction[horizon, 1:p, 2:(p + 1)]);
+        //print("ls = ");
+        //print(multi_normal_lpdf(y[t + horizon] | full_prediction[horizon, 1:p, 1], full_prediction[horizon, 1:p, 2:(p + 1)]));
       }
     }
     return ll;
@@ -3410,4 +3410,4 @@ functions{
     }
     return P;
   }
-}
+//}
