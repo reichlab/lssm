@@ -1,5 +1,5 @@
-functions{
-#include lib/functions.stan
+functions {
+#include /lib/functions.stan
 }
 
 data {

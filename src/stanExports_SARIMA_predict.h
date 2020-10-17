@@ -33,9 +33,9 @@ static int current_statement_begin__;
 stan::io::program_reader prog_reader__() {
     stan::io::program_reader reader;
     reader.add_event(0, 0, "start", "model_SARIMA_predict");
-    reader.add_event(1, 1, "include", "lib/functions.stan");
-    reader.add_event(1, 0, "start", "lib/functions.stan");
-    reader.add_event(3414, 3413, "end", "lib/functions.stan");
+    reader.add_event(1, 1, "include", "/lib/functions.stan");
+    reader.add_event(1, 0, "start", "/lib/functions.stan");
+    reader.add_event(3414, 3413, "end", "/lib/functions.stan");
     reader.add_event(3414, 2, "restart", "model_SARIMA_predict");
     reader.add_event(3598, 184, "end", "model_SARIMA_predict");
     return reader;

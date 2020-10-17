@@ -37,7 +37,11 @@ stan::io::program_reader prog_reader__() {
     reader.add_event(1, 0, "start", "/lib/functions.stan");
     reader.add_event(3414, 3413, "end", "/lib/functions.stan");
     reader.add_event(3414, 2, "restart", "model_SARIMA_model");
-    reader.add_event(3606, 192, "end", "model_SARIMA_model");
+    reader.add_event(3414, 2, "include", "/lib/sarima_utils.stan");
+    reader.add_event(3414, 0, "start", "/lib/sarima_utils.stan");
+    reader.add_event(3562, 148, "end", "/lib/sarima_utils.stan");
+    reader.add_event(3562, 3, "restart", "model_SARIMA_model");
+    reader.add_event(3697, 136, "end", "model_SARIMA_model");
     return reader;
 }
 template <typename T0__>
@@ -6088,6 +6092,299 @@ struct stationary_cov_functor__ {
         return stationary_cov(T, RQR, pstream__);
     }
 };
+Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>
+sarima_build_observation_matrices(const int& m, std::ostream* pstream__) {
+    typedef double local_scalar_t__;
+    typedef local_scalar_t__ fun_return_scalar_t__;
+    const static bool propto__ = true;
+    (void) propto__;
+        local_scalar_t__ DUMMY_VAR__(std::numeric_limits<double>::quiet_NaN());
+        (void) DUMMY_VAR__;  // suppress unused var warning
+    int current_statement_begin__ = -1;
+    try {
+        {
+        current_statement_begin__ = 3426;
+        int p(0);
+        (void) p;  // dummy to suppress unused var warning
+        stan::math::fill(p, std::numeric_limits<int>::min());
+        stan::math::assign(p,1);
+        current_statement_begin__ = 3429;
+        validate_non_negative_index("d", "p", p);
+        Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> d(p);
+        stan::math::initialize(d, DUMMY_VAR__);
+        stan::math::fill(d, DUMMY_VAR__);
+        stan::math::assign(d,rep_vector(0, p));
+        current_statement_begin__ = 3432;
+        validate_non_negative_index("Z", "p", p);
+        validate_non_negative_index("Z", "m", m);
+        Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, Eigen::Dynamic> Z(p, m);
+        stan::math::initialize(Z, DUMMY_VAR__);
+        stan::math::fill(Z, DUMMY_VAR__);
+        stan::math::assign(Z,append_col(stan::math::to_matrix(stan::math::array_builder<Eigen::Matrix<local_scalar_t__, 1, Eigen::Dynamic> >().add(stan::math::to_row_vector(stan::math::array_builder<local_scalar_t__ >().add(1).array())).array()), to_matrix(rep_row_vector(0, (m - 1)))));
+        current_statement_begin__ = 3435;
+        validate_non_negative_index("H", "p", p);
+        validate_non_negative_index("H", "p", p);
+        Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, Eigen::Dynamic> H(p, p);
+        stan::math::initialize(H, DUMMY_VAR__);
+        stan::math::fill(H, DUMMY_VAR__);
+        stan::math::assign(H,stan::math::to_matrix(stan::math::array_builder<Eigen::Matrix<local_scalar_t__, 1, Eigen::Dynamic> >().add(stan::math::to_row_vector(stan::math::array_builder<local_scalar_t__ >().add(0).array())).array()));
+        current_statement_begin__ = 3438;
+        validate_non_negative_index("result", "p", p);
+        validate_non_negative_index("result", "((1 + m) + p)", ((1 + m) + p));
+        Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, Eigen::Dynamic> result(p, ((1 + m) + p));
+        stan::math::initialize(result, DUMMY_VAR__);
+        stan::math::fill(result, DUMMY_VAR__);
+        stan::math::assign(result,append_col(append_col(to_matrix(d), Z), H));
+        current_statement_begin__ = 3440;
+        return stan::math::promote_scalar<fun_return_scalar_t__>(result);
+        }
+    } catch (const std::exception& e) {
+        stan::lang::rethrow_located(e, current_statement_begin__, prog_reader__());
+        // Next line prevents compiler griping about no return
+        throw std::runtime_error("*** IF YOU SEE THIS, PLEASE REPORT A BUG ***");
+    }
+}
+struct sarima_build_observation_matrices_functor__ {
+            Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>
+    operator()(const int& m, std::ostream* pstream__) const {
+        return sarima_build_observation_matrices(m, pstream__);
+    }
+};
+template <typename T7__, typename T8__, typename T9__, typename T10__, typename T11__, typename T12__>
+Eigen::Matrix<typename boost::math::tools::promote_args<T7__, T8__, T9__, T10__, typename boost::math::tools::promote_args<T11__, T12__>::type>::type, Eigen::Dynamic, Eigen::Dynamic>
+sarima_build_state_matrices(const int& p_ar,
+                                const int& q_ma,
+                                const int& P_ar,
+                                const int& Q_ma,
+                                const int& ts_frequency,
+                                const int& include_intercept,
+                                const int& stationary,
+                                const Eigen::Matrix<T7__, Eigen::Dynamic, 1>& phi_0,
+                                const Eigen::Matrix<T8__, Eigen::Dynamic, 1>& phi,
+                                const Eigen::Matrix<T9__, Eigen::Dynamic, 1>& phi_seasonal,
+                                const Eigen::Matrix<T10__, Eigen::Dynamic, 1>& theta,
+                                const Eigen::Matrix<T11__, Eigen::Dynamic, 1>& theta_seasonal,
+                                const T12__& var_zeta, std::ostream* pstream__) {
+    typedef typename boost::math::tools::promote_args<T7__, T8__, T9__, T10__, typename boost::math::tools::promote_args<T11__, T12__>::type>::type local_scalar_t__;
+    typedef local_scalar_t__ fun_return_scalar_t__;
+    const static bool propto__ = true;
+    (void) propto__;
+        local_scalar_t__ DUMMY_VAR__(std::numeric_limits<double>::quiet_NaN());
+        (void) DUMMY_VAR__;  // suppress unused var warning
+    int current_statement_begin__ = -1;
+    try {
+        {
+        current_statement_begin__ = 3461;
+        int r(0);
+        (void) r;  // dummy to suppress unused var warning
+        stan::math::fill(r, std::numeric_limits<int>::min());
+        stan::math::assign(r,std::max((p_ar + (P_ar * ts_frequency)), ((q_ma + (Q_ma * ts_frequency)) + 1)));
+        current_statement_begin__ = 3463;
+        int m(0);
+        (void) m;  // dummy to suppress unused var warning
+        stan::math::fill(m, std::numeric_limits<int>::min());
+        stan::math::assign(m,r);
+        current_statement_begin__ = 3466;
+        validate_non_negative_index("c", "m", m);
+        Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> c(m);
+        stan::math::initialize(c, DUMMY_VAR__);
+        stan::math::fill(c, DUMMY_VAR__);
+        current_statement_begin__ = 3469;
+        validate_non_negative_index("Q", "1", 1);
+        validate_non_negative_index("Q", "1", 1);
+        Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, Eigen::Dynamic> Q(1, 1);
+        stan::math::initialize(Q, DUMMY_VAR__);
+        stan::math::fill(Q, DUMMY_VAR__);
+        stan::math::assign(Q,stan::math::to_matrix(stan::math::array_builder<Eigen::Matrix<local_scalar_t__, 1, Eigen::Dynamic> >().add(stan::math::to_row_vector(stan::math::array_builder<local_scalar_t__ >().add(var_zeta).array())).array()));
+        current_statement_begin__ = 3472;
+        validate_non_negative_index("T", "m", m);
+        validate_non_negative_index("T", "m", m);
+        Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, Eigen::Dynamic> T(m, m);
+        stan::math::initialize(T, DUMMY_VAR__);
+        stan::math::fill(T, DUMMY_VAR__);
+        current_statement_begin__ = 3473;
+        validate_non_negative_index("R", "m", m);
+        validate_non_negative_index("R", "1", 1);
+        Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, Eigen::Dynamic> R(m, 1);
+        stan::math::initialize(R, DUMMY_VAR__);
+        stan::math::fill(R, DUMMY_VAR__);
+        current_statement_begin__ = 3476;
+        validate_non_negative_index("a0", "m", m);
+        Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> a0(m);
+        stan::math::initialize(a0, DUMMY_VAR__);
+        stan::math::fill(a0, DUMMY_VAR__);
+        stan::math::assign(a0,rep_vector(0, m));
+        current_statement_begin__ = 3479;
+        validate_non_negative_index("a1", "m", m);
+        Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> a1(m);
+        stan::math::initialize(a1, DUMMY_VAR__);
+        stan::math::fill(a1, DUMMY_VAR__);
+        current_statement_begin__ = 3482;
+        validate_non_negative_index("P1", "m", m);
+        validate_non_negative_index("P1", "m", m);
+        Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, Eigen::Dynamic> P1(m, m);
+        stan::math::initialize(P1, DUMMY_VAR__);
+        stan::math::fill(P1, DUMMY_VAR__);
+        current_statement_begin__ = 3485;
+        validate_non_negative_index("result", "m", m);
+        validate_non_negative_index("result", "(((((1 + m) + 1) + 1) + 1) + m)", (((((1 + m) + 1) + 1) + 1) + m));
+        Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, Eigen::Dynamic> result(m, (((((1 + m) + 1) + 1) + 1) + m));
+        stan::math::initialize(result, DUMMY_VAR__);
+        stan::math::fill(result, DUMMY_VAR__);
+        current_statement_begin__ = 3488;
+        validate_non_negative_index("dummy_phi", "r", r);
+        Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> dummy_phi(r);
+        stan::math::initialize(dummy_phi, DUMMY_VAR__);
+        stan::math::fill(dummy_phi, DUMMY_VAR__);
+        stan::math::assign(dummy_phi,rep_vector(0, r));
+        current_statement_begin__ = 3491;
+        validate_non_negative_index("dummy_theta", "(r - 1)", (r - 1));
+        Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> dummy_theta((r - 1));
+        stan::math::initialize(dummy_theta, DUMMY_VAR__);
+        stan::math::fill(dummy_theta, DUMMY_VAR__);
+        stan::math::assign(dummy_theta,rep_vector(0, (r - 1)));
+        current_statement_begin__ = 3494;
+        if (as_bool(logical_gt(p_ar, 0))) {
+            current_statement_begin__ = 3495;
+            stan::model::assign(dummy_phi, 
+                        stan::model::cons_list(stan::model::index_min_max(1, p_ar), stan::model::nil_index_list()), 
+                        phi, 
+                        "assigning variable dummy_phi");
+        }
+        current_statement_begin__ = 3498;
+        if (as_bool(logical_gt(P_ar, 0))) {
+            current_statement_begin__ = 3499;
+            for (int i = 1; i <= P_ar; ++i) {
+                current_statement_begin__ = 3500;
+                stan::model::assign(dummy_phi, 
+                            stan::model::cons_list(stan::model::index_uni((i * ts_frequency)), stan::model::nil_index_list()), 
+                            get_base1(phi_seasonal, i, "phi_seasonal", 1), 
+                            "assigning variable dummy_phi");
+            }
+        }
+        current_statement_begin__ = 3504;
+        if (as_bool((primitive_value(logical_gt(p_ar, 0)) && primitive_value(logical_gt(P_ar, 0))))) {
+            current_statement_begin__ = 3505;
+            for (int i = 1; i <= p_ar; ++i) {
+                current_statement_begin__ = 3506;
+                for (int j = 1; j <= P_ar; ++j) {
+                    current_statement_begin__ = 3507;
+                    stan::model::assign(dummy_phi, 
+                                stan::model::cons_list(stan::model::index_uni((i + (j * ts_frequency))), stan::model::nil_index_list()), 
+                                (-(get_base1(phi, i, "phi", 1)) * get_base1(phi_seasonal, j, "phi_seasonal", 1)), 
+                                "assigning variable dummy_phi");
+                }
+            }
+        }
+        current_statement_begin__ = 3513;
+        if (as_bool(logical_gt(q_ma, 0))) {
+            current_statement_begin__ = 3514;
+            stan::model::assign(dummy_theta, 
+                        stan::model::cons_list(stan::model::index_min_max(1, q_ma), stan::model::nil_index_list()), 
+                        theta, 
+                        "assigning variable dummy_theta");
+        }
+        current_statement_begin__ = 3517;
+        if (as_bool(logical_gt(Q_ma, 0))) {
+            current_statement_begin__ = 3518;
+            for (int i = 1; i <= Q_ma; ++i) {
+                current_statement_begin__ = 3519;
+                stan::model::assign(dummy_theta, 
+                            stan::model::cons_list(stan::model::index_uni((i * ts_frequency)), stan::model::nil_index_list()), 
+                            get_base1(theta_seasonal, i, "theta_seasonal", 1), 
+                            "assigning variable dummy_theta");
+            }
+        }
+        current_statement_begin__ = 3523;
+        if (as_bool((primitive_value(logical_gt(q_ma, 0)) && primitive_value(logical_gt(Q_ma, 0))))) {
+            current_statement_begin__ = 3524;
+            for (int i = 1; i <= q_ma; ++i) {
+                current_statement_begin__ = 3525;
+                for (int j = 1; j <= Q_ma; ++j) {
+                    current_statement_begin__ = 3526;
+                    stan::model::assign(dummy_theta, 
+                                stan::model::cons_list(stan::model::index_uni((i + (j * ts_frequency))), stan::model::nil_index_list()), 
+                                (-(get_base1(theta, i, "theta", 1)) * get_base1(theta_seasonal, j, "theta_seasonal", 1)), 
+                                "assigning variable dummy_theta");
+                }
+            }
+        }
+        current_statement_begin__ = 3532;
+        stan::math::assign(R, append_row(stan::math::to_matrix(stan::math::array_builder<Eigen::Matrix<local_scalar_t__, 1, Eigen::Dynamic> >().add(stan::math::to_row_vector(stan::math::array_builder<local_scalar_t__ >().add(1).array())).array()), to_matrix(dummy_theta)));
+        current_statement_begin__ = 3535;
+        stan::math::assign(T, append_col(dummy_phi, append_row(diag_matrix(rep_vector(1, (m - 1))), to_matrix(rep_row_vector(0, (m - 1))))));
+        current_statement_begin__ = 3540;
+        stan::math::assign(P1, multiply(var_zeta, stationary_cov(T, quad_form_sym(Q, transpose(R)), pstream__)));
+        current_statement_begin__ = 3543;
+        if (as_bool(include_intercept)) {
+            current_statement_begin__ = 3544;
+            stan::math::assign(c, append_row(phi_0, rep_vector(0, (m - 1))));
+        } else {
+            current_statement_begin__ = 3546;
+            stan::math::assign(c, rep_vector(0, m));
+        }
+        current_statement_begin__ = 3550;
+        stan::math::assign(a1, ssm_update_predicted_a(c, T, a0, pstream__));
+        current_statement_begin__ = 3551;
+        stan::math::assign(P1, ssm_update_predicted_P(P1, T, quad_form_sym(Q, transpose(R)), pstream__));
+        current_statement_begin__ = 3554;
+        stan::model::assign(result, 
+                    stan::model::cons_list(stan::model::index_omni(), stan::model::cons_list(stan::model::index_uni(1), stan::model::nil_index_list())), 
+                    c, 
+                    "assigning variable result");
+        current_statement_begin__ = 3555;
+        stan::model::assign(result, 
+                    stan::model::cons_list(stan::model::index_omni(), stan::model::cons_list(stan::model::index_min_max((1 + 1), (1 + m)), stan::model::nil_index_list())), 
+                    T, 
+                    "assigning variable result");
+        current_statement_begin__ = 3556;
+        stan::model::assign(result, 
+                    stan::model::cons_list(stan::model::index_omni(), stan::model::cons_list(stan::model::index_min_max(((1 + m) + 1), ((1 + m) + 1)), stan::model::nil_index_list())), 
+                    R, 
+                    "assigning variable result");
+        current_statement_begin__ = 3557;
+        stan::model::assign(result, 
+                    stan::model::cons_list(stan::model::index_omni(), stan::model::cons_list(stan::model::index_min_max((((1 + m) + 1) + 1), (((1 + m) + 1) + 1)), stan::model::nil_index_list())), 
+                    Q, 
+                    "assigning variable result");
+        current_statement_begin__ = 3558;
+        stan::model::assign(result, 
+                    stan::model::cons_list(stan::model::index_omni(), stan::model::cons_list(stan::model::index_uni(((((1 + m) + 1) + 1) + 1)), stan::model::nil_index_list())), 
+                    a1, 
+                    "assigning variable result");
+        current_statement_begin__ = 3559;
+        stan::model::assign(result, 
+                    stan::model::cons_list(stan::model::index_omni(), stan::model::cons_list(stan::model::index_min_max((((((1 + m) + 1) + 1) + 1) + 1), (((((1 + m) + 1) + 1) + 1) + m)), stan::model::nil_index_list())), 
+                    P1, 
+                    "assigning variable result");
+        current_statement_begin__ = 3561;
+        return stan::math::promote_scalar<fun_return_scalar_t__>(result);
+        }
+    } catch (const std::exception& e) {
+        stan::lang::rethrow_located(e, current_statement_begin__, prog_reader__());
+        // Next line prevents compiler griping about no return
+        throw std::runtime_error("*** IF YOU SEE THIS, PLEASE REPORT A BUG ***");
+    }
+}
+struct sarima_build_state_matrices_functor__ {
+    template <typename T7__, typename T8__, typename T9__, typename T10__, typename T11__, typename T12__>
+        Eigen::Matrix<typename boost::math::tools::promote_args<T7__, T8__, T9__, T10__, typename boost::math::tools::promote_args<T11__, T12__>::type>::type, Eigen::Dynamic, Eigen::Dynamic>
+    operator()(const int& p_ar,
+                                const int& q_ma,
+                                const int& P_ar,
+                                const int& Q_ma,
+                                const int& ts_frequency,
+                                const int& include_intercept,
+                                const int& stationary,
+                                const Eigen::Matrix<T7__, Eigen::Dynamic, 1>& phi_0,
+                                const Eigen::Matrix<T8__, Eigen::Dynamic, 1>& phi,
+                                const Eigen::Matrix<T9__, Eigen::Dynamic, 1>& phi_seasonal,
+                                const Eigen::Matrix<T10__, Eigen::Dynamic, 1>& theta,
+                                const Eigen::Matrix<T11__, Eigen::Dynamic, 1>& theta_seasonal,
+                                const T12__& var_zeta, std::ostream* pstream__) const {
+        return sarima_build_state_matrices(p_ar, q_ma, P_ar, Q_ma, ts_frequency, include_intercept, stationary, phi_0, phi, phi_seasonal, theta, theta_seasonal, var_zeta, pstream__);
+    }
+};
 #include <stan_meta_header.hpp>
 class model_SARIMA_model
   : public stan::model::model_base_crtp<model_SARIMA_model> {
@@ -6105,9 +6402,10 @@ private:
         int horizon;
         int r;
         int m;
+        matrix_d observation_matrices;
+        vector_d d;
         matrix_d Z;
         matrix_d H;
-        vector_d a0;
 public:
     model_SARIMA_model(stan::io::var_context& context__,
         std::ostream* pstream__ = 0)
@@ -6138,21 +6436,21 @@ public:
         (void) DUMMY_VAR__;  // suppress unused var warning
         try {
             // initialize data block variables from context__
-            current_statement_begin__ = 3419;
+            current_statement_begin__ = 3567;
             context__.validate_dims("data initialization", "n", "int", context__.to_vec());
             n = int(0);
             vals_i__ = context__.vals_i("n");
             pos__ = 0;
             n = vals_i__[pos__++];
             check_greater_or_equal(function__, "n", n, 0);
-            current_statement_begin__ = 3421;
+            current_statement_begin__ = 3569;
             context__.validate_dims("data initialization", "p", "int", context__.to_vec());
             p = int(0);
             vals_i__ = context__.vals_i("p");
             pos__ = 0;
             p = vals_i__[pos__++];
             check_greater_or_equal(function__, "p", p, 0);
-            current_statement_begin__ = 3423;
+            current_statement_begin__ = 3571;
             validate_non_negative_index("y", "p", p);
             validate_non_negative_index("y", "n", n);
             context__.validate_dims("data initialization", "y", "vector_d", context__.to_vec(n,p));
@@ -6166,42 +6464,42 @@ public:
                     y[k_0__](j_1__) = vals_r__[pos__++];
                 }
             }
-            current_statement_begin__ = 3425;
+            current_statement_begin__ = 3573;
             context__.validate_dims("data initialization", "p_ar", "int", context__.to_vec());
             p_ar = int(0);
             vals_i__ = context__.vals_i("p_ar");
             pos__ = 0;
             p_ar = vals_i__[pos__++];
             check_greater_or_equal(function__, "p_ar", p_ar, 0);
-            current_statement_begin__ = 3427;
+            current_statement_begin__ = 3575;
             context__.validate_dims("data initialization", "q_ma", "int", context__.to_vec());
             q_ma = int(0);
             vals_i__ = context__.vals_i("q_ma");
             pos__ = 0;
             q_ma = vals_i__[pos__++];
             check_greater_or_equal(function__, "q_ma", q_ma, 0);
-            current_statement_begin__ = 3429;
+            current_statement_begin__ = 3577;
             context__.validate_dims("data initialization", "P_ar", "int", context__.to_vec());
             P_ar = int(0);
             vals_i__ = context__.vals_i("P_ar");
             pos__ = 0;
             P_ar = vals_i__[pos__++];
             check_greater_or_equal(function__, "P_ar", P_ar, 0);
-            current_statement_begin__ = 3431;
+            current_statement_begin__ = 3579;
             context__.validate_dims("data initialization", "Q_ma", "int", context__.to_vec());
             Q_ma = int(0);
             vals_i__ = context__.vals_i("Q_ma");
             pos__ = 0;
             Q_ma = vals_i__[pos__++];
             check_greater_or_equal(function__, "Q_ma", Q_ma, 0);
-            current_statement_begin__ = 3434;
+            current_statement_begin__ = 3582;
             context__.validate_dims("data initialization", "ts_frequency", "int", context__.to_vec());
             ts_frequency = int(0);
             vals_i__ = context__.vals_i("ts_frequency");
             pos__ = 0;
             ts_frequency = vals_i__[pos__++];
             check_greater_or_equal(function__, "ts_frequency", ts_frequency, 0);
-            current_statement_begin__ = 3438;
+            current_statement_begin__ = 3586;
             context__.validate_dims("data initialization", "include_intercept", "int", context__.to_vec());
             include_intercept = int(0);
             vals_i__ = context__.vals_i("include_intercept");
@@ -6209,7 +6507,7 @@ public:
             include_intercept = vals_i__[pos__++];
             check_greater_or_equal(function__, "include_intercept", include_intercept, 0);
             check_less_or_equal(function__, "include_intercept", include_intercept, 1);
-            current_statement_begin__ = 3442;
+            current_statement_begin__ = 3590;
             context__.validate_dims("data initialization", "stationary", "int", context__.to_vec());
             stationary = int(0);
             vals_i__ = context__.vals_i("stationary");
@@ -6217,7 +6515,7 @@ public:
             stationary = vals_i__[pos__++];
             check_greater_or_equal(function__, "stationary", stationary, 0);
             check_less_or_equal(function__, "stationary", stationary, 1);
-            current_statement_begin__ = 3448;
+            current_statement_begin__ = 3596;
             context__.validate_dims("data initialization", "horizon", "int", context__.to_vec());
             horizon = int(0);
             vals_i__ = context__.vals_i("horizon");
@@ -6225,56 +6523,62 @@ public:
             horizon = vals_i__[pos__++];
             check_greater_or_equal(function__, "horizon", horizon, 0);
             // initialize transformed data variables
-            current_statement_begin__ = 3452;
+            current_statement_begin__ = 3600;
             r = int(0);
             stan::math::fill(r, std::numeric_limits<int>::min());
             stan::math::assign(r,std::max((p_ar + (P_ar * ts_frequency)), ((q_ma + (Q_ma * ts_frequency)) + 1)));
-            current_statement_begin__ = 3456;
+            current_statement_begin__ = 3604;
             m = int(0);
             stan::math::fill(m, std::numeric_limits<int>::min());
             stan::math::assign(m,r);
-            current_statement_begin__ = 3459;
+            current_statement_begin__ = 3607;
+            validate_non_negative_index("observation_matrices", "p", p);
+            validate_non_negative_index("observation_matrices", "((1 + m) + p)", ((1 + m) + p));
+            observation_matrices = Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>(p, ((1 + m) + p));
+            stan::math::fill(observation_matrices, DUMMY_VAR__);
+            stan::math::assign(observation_matrices,sarima_build_observation_matrices(m, pstream__));
+            current_statement_begin__ = 3611;
+            validate_non_negative_index("d", "p", p);
+            d = Eigen::Matrix<double, Eigen::Dynamic, 1>(p);
+            stan::math::fill(d, DUMMY_VAR__);
+            stan::math::assign(d,stan::model::rvalue(observation_matrices, stan::model::cons_list(stan::model::index_omni(), stan::model::cons_list(stan::model::index_uni(1), stan::model::nil_index_list())), "observation_matrices"));
+            current_statement_begin__ = 3614;
             validate_non_negative_index("Z", "p", p);
             validate_non_negative_index("Z", "m", m);
             Z = Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>(p, m);
             stan::math::fill(Z, DUMMY_VAR__);
-            stan::math::assign(Z,append_col(stan::math::to_matrix(stan::math::array_builder<Eigen::Matrix<double, 1, Eigen::Dynamic> >().add(stan::math::to_row_vector(stan::math::array_builder<double >().add(1).array())).array()), to_matrix(rep_row_vector(0, (m - 1)))));
-            current_statement_begin__ = 3462;
+            stan::math::assign(Z,stan::model::rvalue(observation_matrices, stan::model::cons_list(stan::model::index_omni(), stan::model::cons_list(stan::model::index_min_max((1 + 1), (1 + m)), stan::model::nil_index_list())), "observation_matrices"));
+            current_statement_begin__ = 3617;
             validate_non_negative_index("H", "p", p);
             validate_non_negative_index("H", "p", p);
             H = Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>(p, p);
             stan::math::fill(H, DUMMY_VAR__);
-            stan::math::assign(H,stan::math::to_matrix(stan::math::array_builder<Eigen::Matrix<double, 1, Eigen::Dynamic> >().add(stan::math::to_row_vector(stan::math::array_builder<double >().add(0).array())).array()));
-            current_statement_begin__ = 3465;
-            validate_non_negative_index("a0", "m", m);
-            a0 = Eigen::Matrix<double, Eigen::Dynamic, 1>(m);
-            stan::math::fill(a0, DUMMY_VAR__);
-            stan::math::assign(a0,rep_vector(0, m));
+            stan::math::assign(H,stan::model::rvalue(observation_matrices, stan::model::cons_list(stan::model::index_omni(), stan::model::cons_list(stan::model::index_min_max(((1 + m) + 1), ((1 + m) + p)), stan::model::nil_index_list())), "observation_matrices"));
             // execute transformed data statements
             // validate transformed data
-            current_statement_begin__ = 3452;
+            current_statement_begin__ = 3600;
             check_greater_or_equal(function__, "r", r, 0);
-            current_statement_begin__ = 3456;
+            current_statement_begin__ = 3604;
             check_greater_or_equal(function__, "m", m, 0);
             // validate, set parameter ranges
             num_params_r__ = 0U;
             param_ranges_i__.clear();
-            current_statement_begin__ = 3470;
+            current_statement_begin__ = 3622;
             validate_non_negative_index("phi_0", "include_intercept", include_intercept);
             num_params_r__ += include_intercept;
-            current_statement_begin__ = 3473;
+            current_statement_begin__ = 3625;
             validate_non_negative_index("unconstrained_phi", "p_ar", p_ar);
             num_params_r__ += p_ar;
-            current_statement_begin__ = 3476;
+            current_statement_begin__ = 3628;
             validate_non_negative_index("unconstrained_phi_seasonal", "P_ar", P_ar);
             num_params_r__ += P_ar;
-            current_statement_begin__ = 3479;
+            current_statement_begin__ = 3631;
             validate_non_negative_index("unconstrained_theta", "q_ma", q_ma);
             num_params_r__ += q_ma;
-            current_statement_begin__ = 3482;
+            current_statement_begin__ = 3634;
             validate_non_negative_index("unconstrained_theta_seasonal", "Q_ma", Q_ma);
             num_params_r__ += Q_ma;
-            current_statement_begin__ = 3485;
+            current_statement_begin__ = 3637;
             num_params_r__ += 1;
         } catch (const std::exception& e) {
             stan::lang::rethrow_located(e, current_statement_begin__, prog_reader__());
@@ -6293,7 +6597,7 @@ public:
         (void) pos__; // dummy call to supress warning
         std::vector<double> vals_r__;
         std::vector<int> vals_i__;
-        current_statement_begin__ = 3470;
+        current_statement_begin__ = 3622;
         if (!(context__.contains_r("phi_0")))
             stan::lang::rethrow_located(std::runtime_error(std::string("Variable phi_0 missing")), current_statement_begin__, prog_reader__());
         vals_r__ = context__.vals_r("phi_0");
@@ -6310,7 +6614,7 @@ public:
         } catch (const std::exception& e) {
             stan::lang::rethrow_located(std::runtime_error(std::string("Error transforming variable phi_0: ") + e.what()), current_statement_begin__, prog_reader__());
         }
-        current_statement_begin__ = 3473;
+        current_statement_begin__ = 3625;
         if (!(context__.contains_r("unconstrained_phi")))
             stan::lang::rethrow_located(std::runtime_error(std::string("Variable unconstrained_phi missing")), current_statement_begin__, prog_reader__());
         vals_r__ = context__.vals_r("unconstrained_phi");
@@ -6327,7 +6631,7 @@ public:
         } catch (const std::exception& e) {
             stan::lang::rethrow_located(std::runtime_error(std::string("Error transforming variable unconstrained_phi: ") + e.what()), current_statement_begin__, prog_reader__());
         }
-        current_statement_begin__ = 3476;
+        current_statement_begin__ = 3628;
         if (!(context__.contains_r("unconstrained_phi_seasonal")))
             stan::lang::rethrow_located(std::runtime_error(std::string("Variable unconstrained_phi_seasonal missing")), current_statement_begin__, prog_reader__());
         vals_r__ = context__.vals_r("unconstrained_phi_seasonal");
@@ -6344,7 +6648,7 @@ public:
         } catch (const std::exception& e) {
             stan::lang::rethrow_located(std::runtime_error(std::string("Error transforming variable unconstrained_phi_seasonal: ") + e.what()), current_statement_begin__, prog_reader__());
         }
-        current_statement_begin__ = 3479;
+        current_statement_begin__ = 3631;
         if (!(context__.contains_r("unconstrained_theta")))
             stan::lang::rethrow_located(std::runtime_error(std::string("Variable unconstrained_theta missing")), current_statement_begin__, prog_reader__());
         vals_r__ = context__.vals_r("unconstrained_theta");
@@ -6361,7 +6665,7 @@ public:
         } catch (const std::exception& e) {
             stan::lang::rethrow_located(std::runtime_error(std::string("Error transforming variable unconstrained_theta: ") + e.what()), current_statement_begin__, prog_reader__());
         }
-        current_statement_begin__ = 3482;
+        current_statement_begin__ = 3634;
         if (!(context__.contains_r("unconstrained_theta_seasonal")))
             stan::lang::rethrow_located(std::runtime_error(std::string("Variable unconstrained_theta_seasonal missing")), current_statement_begin__, prog_reader__());
         vals_r__ = context__.vals_r("unconstrained_theta_seasonal");
@@ -6378,7 +6682,7 @@ public:
         } catch (const std::exception& e) {
             stan::lang::rethrow_located(std::runtime_error(std::string("Error transforming variable unconstrained_theta_seasonal: ") + e.what()), current_statement_begin__, prog_reader__());
         }
-        current_statement_begin__ = 3485;
+        current_statement_begin__ = 3637;
         if (!(context__.contains_r("var_zeta")))
             stan::lang::rethrow_located(std::runtime_error(std::string("Variable var_zeta missing")), current_statement_begin__, prog_reader__());
         vals_r__ = context__.vals_r("var_zeta");
@@ -6416,42 +6720,42 @@ public:
         try {
             stan::io::reader<local_scalar_t__> in__(params_r__, params_i__);
             // model parameters
-            current_statement_begin__ = 3470;
+            current_statement_begin__ = 3622;
             Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> phi_0;
             (void) phi_0;  // dummy to suppress unused var warning
             if (jacobian__)
                 phi_0 = in__.vector_constrain(include_intercept, lp__);
             else
                 phi_0 = in__.vector_constrain(include_intercept);
-            current_statement_begin__ = 3473;
+            current_statement_begin__ = 3625;
             Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> unconstrained_phi;
             (void) unconstrained_phi;  // dummy to suppress unused var warning
             if (jacobian__)
                 unconstrained_phi = in__.vector_constrain(p_ar, lp__);
             else
                 unconstrained_phi = in__.vector_constrain(p_ar);
-            current_statement_begin__ = 3476;
+            current_statement_begin__ = 3628;
             Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> unconstrained_phi_seasonal;
             (void) unconstrained_phi_seasonal;  // dummy to suppress unused var warning
             if (jacobian__)
                 unconstrained_phi_seasonal = in__.vector_constrain(P_ar, lp__);
             else
                 unconstrained_phi_seasonal = in__.vector_constrain(P_ar);
-            current_statement_begin__ = 3479;
+            current_statement_begin__ = 3631;
             Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> unconstrained_theta;
             (void) unconstrained_theta;  // dummy to suppress unused var warning
             if (jacobian__)
                 unconstrained_theta = in__.vector_constrain(q_ma, lp__);
             else
                 unconstrained_theta = in__.vector_constrain(q_ma);
-            current_statement_begin__ = 3482;
+            current_statement_begin__ = 3634;
             Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> unconstrained_theta_seasonal;
             (void) unconstrained_theta_seasonal;  // dummy to suppress unused var warning
             if (jacobian__)
                 unconstrained_theta_seasonal = in__.vector_constrain(Q_ma, lp__);
             else
                 unconstrained_theta_seasonal = in__.vector_constrain(Q_ma);
-            current_statement_begin__ = 3485;
+            current_statement_begin__ = 3637;
             local_scalar_t__ var_zeta;
             (void) var_zeta;  // dummy to suppress unused var warning
             if (jacobian__)
@@ -6459,182 +6763,136 @@ public:
             else
                 var_zeta = in__.scalar_lb_constrain(0);
             // transformed parameters
-            current_statement_begin__ = 3493;
-            validate_non_negative_index("c", "m", m);
-            Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> c(m);
-            stan::math::initialize(c, DUMMY_VAR__);
-            stan::math::fill(c, DUMMY_VAR__);
-            current_statement_begin__ = 3496;
-            validate_non_negative_index("d", "p", p);
-            Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> d(p);
-            stan::math::initialize(d, DUMMY_VAR__);
-            stan::math::fill(d, DUMMY_VAR__);
-            stan::math::assign(d,rep_vector(0, p));
-            current_statement_begin__ = 3499;
-            validate_non_negative_index("Q", "1", 1);
-            validate_non_negative_index("Q", "1", 1);
-            Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, Eigen::Dynamic> Q(1, 1);
-            stan::math::initialize(Q, DUMMY_VAR__);
-            stan::math::fill(Q, DUMMY_VAR__);
-            stan::math::assign(Q,stan::math::to_matrix(stan::math::array_builder<Eigen::Matrix<local_scalar_t__, 1, Eigen::Dynamic> >().add(stan::math::to_row_vector(stan::math::array_builder<local_scalar_t__ >().add(var_zeta).array())).array()));
-            current_statement_begin__ = 3502;
-            validate_non_negative_index("T", "m", m);
-            validate_non_negative_index("T", "m", m);
-            Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, Eigen::Dynamic> T(m, m);
-            stan::math::initialize(T, DUMMY_VAR__);
-            stan::math::fill(T, DUMMY_VAR__);
-            current_statement_begin__ = 3503;
-            validate_non_negative_index("R", "m", m);
-            validate_non_negative_index("R", "1", 1);
-            Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, Eigen::Dynamic> R(m, 1);
-            stan::math::initialize(R, DUMMY_VAR__);
-            stan::math::fill(R, DUMMY_VAR__);
-            current_statement_begin__ = 3506;
-            validate_non_negative_index("a1", "m", m);
-            Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> a1(m);
-            stan::math::initialize(a1, DUMMY_VAR__);
-            stan::math::fill(a1, DUMMY_VAR__);
-            current_statement_begin__ = 3509;
-            validate_non_negative_index("P1", "m", m);
-            validate_non_negative_index("P1", "m", m);
-            Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, Eigen::Dynamic> P1(m, m);
-            stan::math::initialize(P1, DUMMY_VAR__);
-            stan::math::fill(P1, DUMMY_VAR__);
-            current_statement_begin__ = 3512;
-            validate_non_negative_index("dummy_phi", "r", r);
-            Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> dummy_phi(r);
-            stan::math::initialize(dummy_phi, DUMMY_VAR__);
-            stan::math::fill(dummy_phi, DUMMY_VAR__);
-            stan::math::assign(dummy_phi,rep_vector(0, r));
-            current_statement_begin__ = 3515;
-            validate_non_negative_index("dummy_theta", "(r - 1)", (r - 1));
-            Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> dummy_theta((r - 1));
-            stan::math::initialize(dummy_theta, DUMMY_VAR__);
-            stan::math::fill(dummy_theta, DUMMY_VAR__);
-            stan::math::assign(dummy_theta,rep_vector(0, (r - 1)));
-            current_statement_begin__ = 3518;
+            current_statement_begin__ = 3642;
             validate_non_negative_index("phi", "p_ar", p_ar);
             Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> phi(p_ar);
             stan::math::initialize(phi, DUMMY_VAR__);
             stan::math::fill(phi, DUMMY_VAR__);
-            current_statement_begin__ = 3520;
+            current_statement_begin__ = 3643;
             validate_non_negative_index("phi_seasonal", "P_ar", P_ar);
             Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> phi_seasonal(P_ar);
             stan::math::initialize(phi_seasonal, DUMMY_VAR__);
             stan::math::fill(phi_seasonal, DUMMY_VAR__);
-            current_statement_begin__ = 3522;
+            current_statement_begin__ = 3645;
             validate_non_negative_index("theta", "q_ma", q_ma);
             Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> theta(q_ma);
             stan::math::initialize(theta, DUMMY_VAR__);
             stan::math::fill(theta, DUMMY_VAR__);
             stan::math::assign(theta,constrain_stationary(unconstrained_theta, pstream__));
-            current_statement_begin__ = 3524;
+            current_statement_begin__ = 3646;
             validate_non_negative_index("theta_seasonal", "Q_ma", Q_ma);
             Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> theta_seasonal(Q_ma);
             stan::math::initialize(theta_seasonal, DUMMY_VAR__);
             stan::math::fill(theta_seasonal, DUMMY_VAR__);
             stan::math::assign(theta_seasonal,constrain_stationary(unconstrained_theta_seasonal, pstream__));
+            current_statement_begin__ = 3649;
+            validate_non_negative_index("c", "m", m);
+            Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> c(m);
+            stan::math::initialize(c, DUMMY_VAR__);
+            stan::math::fill(c, DUMMY_VAR__);
+            current_statement_begin__ = 3650;
+            validate_non_negative_index("T", "m", m);
+            validate_non_negative_index("T", "m", m);
+            Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, Eigen::Dynamic> T(m, m);
+            stan::math::initialize(T, DUMMY_VAR__);
+            stan::math::fill(T, DUMMY_VAR__);
+            current_statement_begin__ = 3651;
+            validate_non_negative_index("R", "m", m);
+            validate_non_negative_index("R", "1", 1);
+            Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, Eigen::Dynamic> R(m, 1);
+            stan::math::initialize(R, DUMMY_VAR__);
+            stan::math::fill(R, DUMMY_VAR__);
+            current_statement_begin__ = 3652;
+            validate_non_negative_index("Q", "1", 1);
+            validate_non_negative_index("Q", "1", 1);
+            Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, Eigen::Dynamic> Q(1, 1);
+            stan::math::initialize(Q, DUMMY_VAR__);
+            stan::math::fill(Q, DUMMY_VAR__);
+            current_statement_begin__ = 3653;
+            validate_non_negative_index("a1", "m", m);
+            Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> a1(m);
+            stan::math::initialize(a1, DUMMY_VAR__);
+            stan::math::fill(a1, DUMMY_VAR__);
+            current_statement_begin__ = 3654;
+            validate_non_negative_index("P1", "m", m);
+            validate_non_negative_index("P1", "m", m);
+            Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, Eigen::Dynamic> P1(m, m);
+            stan::math::initialize(P1, DUMMY_VAR__);
+            stan::math::fill(P1, DUMMY_VAR__);
             // transformed parameters block statements
-            current_statement_begin__ = 3526;
+            current_statement_begin__ = 3656;
             if (as_bool(stationary)) {
-                current_statement_begin__ = 3527;
+                current_statement_begin__ = 3657;
                 stan::math::assign(phi, constrain_stationary(unconstrained_phi, pstream__));
-                current_statement_begin__ = 3528;
+                current_statement_begin__ = 3658;
                 stan::math::assign(phi_seasonal, constrain_stationary(unconstrained_phi_seasonal, pstream__));
             } else {
-                current_statement_begin__ = 3531;
+                current_statement_begin__ = 3660;
                 stan::math::assign(phi, unconstrained_phi);
-                current_statement_begin__ = 3532;
+                current_statement_begin__ = 3661;
                 stan::math::assign(phi_seasonal, unconstrained_phi_seasonal);
             }
-            current_statement_begin__ = 3536;
-            if (as_bool(logical_gt(p_ar, 0))) {
-                current_statement_begin__ = 3537;
-                stan::model::assign(dummy_phi, 
-                            stan::model::cons_list(stan::model::index_min_max(1, p_ar), stan::model::nil_index_list()), 
-                            phi, 
-                            "assigning variable dummy_phi");
+            {
+            current_statement_begin__ = 3666;
+            validate_non_negative_index("state_matrices", "p", p);
+            validate_non_negative_index("state_matrices", "(((((1 + m) + 1) + 1) + 1) + m)", (((((1 + m) + 1) + 1) + 1) + m));
+            Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, Eigen::Dynamic> state_matrices(p, (((((1 + m) + 1) + 1) + 1) + m));
+            stan::math::initialize(state_matrices, DUMMY_VAR__);
+            stan::math::fill(state_matrices, DUMMY_VAR__);
+            stan::math::assign(state_matrices,sarima_build_state_matrices(p_ar, q_ma, P_ar, Q_ma, ts_frequency, include_intercept, stationary, phi_0, unconstrained_phi, unconstrained_phi_seasonal, unconstrained_theta, unconstrained_theta_seasonal, var_zeta, pstream__));
+            current_statement_begin__ = 3672;
+            stan::math::assign(c, stan::model::rvalue(state_matrices, stan::model::cons_list(stan::model::index_omni(), stan::model::cons_list(stan::model::index_uni(1), stan::model::nil_index_list())), "state_matrices"));
+            current_statement_begin__ = 3675;
+            stan::math::assign(T, stan::model::rvalue(state_matrices, stan::model::cons_list(stan::model::index_omni(), stan::model::cons_list(stan::model::index_min_max((1 + 1), (1 + m)), stan::model::nil_index_list())), "state_matrices"));
+            current_statement_begin__ = 3676;
+            stan::math::assign(R, stan::model::rvalue(state_matrices, stan::model::cons_list(stan::model::index_omni(), stan::model::cons_list(stan::model::index_min_max(((1 + m) + 1), ((1 + m) + 1)), stan::model::nil_index_list())), "state_matrices"));
+            current_statement_begin__ = 3679;
+            stan::math::assign(Q, stan::model::rvalue(state_matrices, stan::model::cons_list(stan::model::index_omni(), stan::model::cons_list(stan::model::index_min_max((((1 + m) + 1) + 1), (((1 + m) + 1) + 1)), stan::model::nil_index_list())), "state_matrices"));
+            current_statement_begin__ = 3682;
+            stan::math::assign(a1, stan::model::rvalue(state_matrices, stan::model::cons_list(stan::model::index_omni(), stan::model::cons_list(stan::model::index_uni(((((1 + m) + 1) + 1) + 1)), stan::model::nil_index_list())), "state_matrices"));
+            current_statement_begin__ = 3685;
+            stan::math::assign(P1, stan::model::rvalue(state_matrices, stan::model::cons_list(stan::model::index_omni(), stan::model::cons_list(stan::model::index_min_max((((((1 + m) + 1) + 1) + 1) + 1), (((((1 + m) + 1) + 1) + 1) + m)), stan::model::nil_index_list())), "state_matrices"));
             }
-            current_statement_begin__ = 3540;
-            if (as_bool(logical_gt(P_ar, 0))) {
-                current_statement_begin__ = 3541;
-                for (int i = 1; i <= P_ar; ++i) {
-                    current_statement_begin__ = 3542;
-                    stan::model::assign(dummy_phi, 
-                                stan::model::cons_list(stan::model::index_uni((i * ts_frequency)), stan::model::nil_index_list()), 
-                                get_base1(phi_seasonal, i, "phi_seasonal", 1), 
-                                "assigning variable dummy_phi");
-                }
-            }
-            current_statement_begin__ = 3546;
-            if (as_bool((primitive_value(logical_gt(p_ar, 0)) && primitive_value(logical_gt(P_ar, 0))))) {
-                current_statement_begin__ = 3547;
-                for (int i = 1; i <= p_ar; ++i) {
-                    current_statement_begin__ = 3548;
-                    for (int j = 1; j <= P_ar; ++j) {
-                        current_statement_begin__ = 3549;
-                        stan::model::assign(dummy_phi, 
-                                    stan::model::cons_list(stan::model::index_uni((i + (j * ts_frequency))), stan::model::nil_index_list()), 
-                                    (-(get_base1(phi, i, "phi", 1)) * get_base1(phi_seasonal, j, "phi_seasonal", 1)), 
-                                    "assigning variable dummy_phi");
-                    }
-                }
-            }
-            current_statement_begin__ = 3556;
-            if (as_bool(logical_gt(q_ma, 0))) {
-                current_statement_begin__ = 3557;
-                stan::model::assign(dummy_theta, 
-                            stan::model::cons_list(stan::model::index_min_max(1, q_ma), stan::model::nil_index_list()), 
-                            theta, 
-                            "assigning variable dummy_theta");
-            }
-            current_statement_begin__ = 3560;
-            if (as_bool(logical_gt(Q_ma, 0))) {
-                current_statement_begin__ = 3561;
-                for (int i = 1; i <= Q_ma; ++i) {
-                    current_statement_begin__ = 3562;
-                    stan::model::assign(dummy_theta, 
-                                stan::model::cons_list(stan::model::index_uni((i * ts_frequency)), stan::model::nil_index_list()), 
-                                get_base1(theta_seasonal, i, "theta_seasonal", 1), 
-                                "assigning variable dummy_theta");
-                }
-            }
-            current_statement_begin__ = 3566;
-            if (as_bool((primitive_value(logical_gt(q_ma, 0)) && primitive_value(logical_gt(Q_ma, 0))))) {
-                current_statement_begin__ = 3567;
-                for (int i = 1; i <= q_ma; ++i) {
-                    current_statement_begin__ = 3568;
-                    for (int j = 1; j <= Q_ma; ++j) {
-                        current_statement_begin__ = 3569;
-                        stan::model::assign(dummy_theta, 
-                                    stan::model::cons_list(stan::model::index_uni((i + (j * ts_frequency))), stan::model::nil_index_list()), 
-                                    (-(get_base1(theta, i, "theta", 1)) * get_base1(theta_seasonal, j, "theta_seasonal", 1)), 
-                                    "assigning variable dummy_theta");
-                    }
-                }
-            }
-            current_statement_begin__ = 3576;
-            stan::math::assign(R, append_row(stan::math::to_matrix(stan::math::array_builder<Eigen::Matrix<double, 1, Eigen::Dynamic> >().add(stan::math::to_row_vector(stan::math::array_builder<double >().add(1).array())).array()), to_matrix(dummy_theta)));
-            current_statement_begin__ = 3579;
-            stan::math::assign(T, append_col(dummy_phi, append_row(diag_matrix(rep_vector(1, (m - 1))), to_matrix(rep_row_vector(0, (m - 1))))));
-            current_statement_begin__ = 3584;
-            stan::math::assign(P1, multiply(var_zeta, stationary_cov(T, quad_form_sym(Q, transpose(R)), pstream__)));
-            current_statement_begin__ = 3587;
-            if (as_bool(include_intercept)) {
-                current_statement_begin__ = 3588;
-                stan::math::assign(c, append_row(phi_0, rep_vector(0, (m - 1))));
-            } else {
-                current_statement_begin__ = 3590;
-                stan::math::assign(c, rep_vector(0, m));
-            }
-            current_statement_begin__ = 3594;
-            stan::math::assign(a1, ssm_update_predicted_a(c, T, a0, pstream__));
-            current_statement_begin__ = 3595;
-            stan::math::assign(P1, ssm_update_predicted_P(P1, T, quad_form_sym(Q, transpose(R)), pstream__));
             // validate transformed parameters
             const char* function__ = "validate transformed params";
             (void) function__;  // dummy to suppress unused var warning
-            current_statement_begin__ = 3493;
+            current_statement_begin__ = 3642;
+            size_t phi_j_1_max__ = p_ar;
+            for (size_t j_1__ = 0; j_1__ < phi_j_1_max__; ++j_1__) {
+                if (stan::math::is_uninitialized(phi(j_1__))) {
+                    std::stringstream msg__;
+                    msg__ << "Undefined transformed parameter: phi" << "(" << j_1__ << ")";
+                    stan::lang::rethrow_located(std::runtime_error(std::string("Error initializing variable phi: ") + msg__.str()), current_statement_begin__, prog_reader__());
+                }
+            }
+            current_statement_begin__ = 3643;
+            size_t phi_seasonal_j_1_max__ = P_ar;
+            for (size_t j_1__ = 0; j_1__ < phi_seasonal_j_1_max__; ++j_1__) {
+                if (stan::math::is_uninitialized(phi_seasonal(j_1__))) {
+                    std::stringstream msg__;
+                    msg__ << "Undefined transformed parameter: phi_seasonal" << "(" << j_1__ << ")";
+                    stan::lang::rethrow_located(std::runtime_error(std::string("Error initializing variable phi_seasonal: ") + msg__.str()), current_statement_begin__, prog_reader__());
+                }
+            }
+            current_statement_begin__ = 3645;
+            size_t theta_j_1_max__ = q_ma;
+            for (size_t j_1__ = 0; j_1__ < theta_j_1_max__; ++j_1__) {
+                if (stan::math::is_uninitialized(theta(j_1__))) {
+                    std::stringstream msg__;
+                    msg__ << "Undefined transformed parameter: theta" << "(" << j_1__ << ")";
+                    stan::lang::rethrow_located(std::runtime_error(std::string("Error initializing variable theta: ") + msg__.str()), current_statement_begin__, prog_reader__());
+                }
+            }
+            current_statement_begin__ = 3646;
+            size_t theta_seasonal_j_1_max__ = Q_ma;
+            for (size_t j_1__ = 0; j_1__ < theta_seasonal_j_1_max__; ++j_1__) {
+                if (stan::math::is_uninitialized(theta_seasonal(j_1__))) {
+                    std::stringstream msg__;
+                    msg__ << "Undefined transformed parameter: theta_seasonal" << "(" << j_1__ << ")";
+                    stan::lang::rethrow_located(std::runtime_error(std::string("Error initializing variable theta_seasonal: ") + msg__.str()), current_statement_begin__, prog_reader__());
+                }
+            }
+            current_statement_begin__ = 3649;
             size_t c_j_1_max__ = m;
             for (size_t j_1__ = 0; j_1__ < c_j_1_max__; ++j_1__) {
                 if (stan::math::is_uninitialized(c(j_1__))) {
@@ -6643,28 +6901,7 @@ public:
                     stan::lang::rethrow_located(std::runtime_error(std::string("Error initializing variable c: ") + msg__.str()), current_statement_begin__, prog_reader__());
                 }
             }
-            current_statement_begin__ = 3496;
-            size_t d_j_1_max__ = p;
-            for (size_t j_1__ = 0; j_1__ < d_j_1_max__; ++j_1__) {
-                if (stan::math::is_uninitialized(d(j_1__))) {
-                    std::stringstream msg__;
-                    msg__ << "Undefined transformed parameter: d" << "(" << j_1__ << ")";
-                    stan::lang::rethrow_located(std::runtime_error(std::string("Error initializing variable d: ") + msg__.str()), current_statement_begin__, prog_reader__());
-                }
-            }
-            current_statement_begin__ = 3499;
-            size_t Q_j_1_max__ = 1;
-            size_t Q_j_2_max__ = 1;
-            for (size_t j_1__ = 0; j_1__ < Q_j_1_max__; ++j_1__) {
-                for (size_t j_2__ = 0; j_2__ < Q_j_2_max__; ++j_2__) {
-                    if (stan::math::is_uninitialized(Q(j_1__, j_2__))) {
-                        std::stringstream msg__;
-                        msg__ << "Undefined transformed parameter: Q" << "(" << j_1__ << ", " << j_2__ << ")";
-                        stan::lang::rethrow_located(std::runtime_error(std::string("Error initializing variable Q: ") + msg__.str()), current_statement_begin__, prog_reader__());
-                    }
-                }
-            }
-            current_statement_begin__ = 3502;
+            current_statement_begin__ = 3650;
             size_t T_j_1_max__ = m;
             size_t T_j_2_max__ = m;
             for (size_t j_1__ = 0; j_1__ < T_j_1_max__; ++j_1__) {
@@ -6676,7 +6913,7 @@ public:
                     }
                 }
             }
-            current_statement_begin__ = 3503;
+            current_statement_begin__ = 3651;
             size_t R_j_1_max__ = m;
             size_t R_j_2_max__ = 1;
             for (size_t j_1__ = 0; j_1__ < R_j_1_max__; ++j_1__) {
@@ -6688,7 +6925,19 @@ public:
                     }
                 }
             }
-            current_statement_begin__ = 3506;
+            current_statement_begin__ = 3652;
+            size_t Q_j_1_max__ = 1;
+            size_t Q_j_2_max__ = 1;
+            for (size_t j_1__ = 0; j_1__ < Q_j_1_max__; ++j_1__) {
+                for (size_t j_2__ = 0; j_2__ < Q_j_2_max__; ++j_2__) {
+                    if (stan::math::is_uninitialized(Q(j_1__, j_2__))) {
+                        std::stringstream msg__;
+                        msg__ << "Undefined transformed parameter: Q" << "(" << j_1__ << ", " << j_2__ << ")";
+                        stan::lang::rethrow_located(std::runtime_error(std::string("Error initializing variable Q: ") + msg__.str()), current_statement_begin__, prog_reader__());
+                    }
+                }
+            }
+            current_statement_begin__ = 3653;
             size_t a1_j_1_max__ = m;
             for (size_t j_1__ = 0; j_1__ < a1_j_1_max__; ++j_1__) {
                 if (stan::math::is_uninitialized(a1(j_1__))) {
@@ -6697,7 +6946,7 @@ public:
                     stan::lang::rethrow_located(std::runtime_error(std::string("Error initializing variable a1: ") + msg__.str()), current_statement_begin__, prog_reader__());
                 }
             }
-            current_statement_begin__ = 3509;
+            current_statement_begin__ = 3654;
             size_t P1_j_1_max__ = m;
             size_t P1_j_2_max__ = m;
             for (size_t j_1__ = 0; j_1__ < P1_j_1_max__; ++j_1__) {
@@ -6709,67 +6958,13 @@ public:
                     }
                 }
             }
-            current_statement_begin__ = 3512;
-            size_t dummy_phi_j_1_max__ = r;
-            for (size_t j_1__ = 0; j_1__ < dummy_phi_j_1_max__; ++j_1__) {
-                if (stan::math::is_uninitialized(dummy_phi(j_1__))) {
-                    std::stringstream msg__;
-                    msg__ << "Undefined transformed parameter: dummy_phi" << "(" << j_1__ << ")";
-                    stan::lang::rethrow_located(std::runtime_error(std::string("Error initializing variable dummy_phi: ") + msg__.str()), current_statement_begin__, prog_reader__());
-                }
-            }
-            current_statement_begin__ = 3515;
-            size_t dummy_theta_j_1_max__ = (r - 1);
-            for (size_t j_1__ = 0; j_1__ < dummy_theta_j_1_max__; ++j_1__) {
-                if (stan::math::is_uninitialized(dummy_theta(j_1__))) {
-                    std::stringstream msg__;
-                    msg__ << "Undefined transformed parameter: dummy_theta" << "(" << j_1__ << ")";
-                    stan::lang::rethrow_located(std::runtime_error(std::string("Error initializing variable dummy_theta: ") + msg__.str()), current_statement_begin__, prog_reader__());
-                }
-            }
-            current_statement_begin__ = 3518;
-            size_t phi_j_1_max__ = p_ar;
-            for (size_t j_1__ = 0; j_1__ < phi_j_1_max__; ++j_1__) {
-                if (stan::math::is_uninitialized(phi(j_1__))) {
-                    std::stringstream msg__;
-                    msg__ << "Undefined transformed parameter: phi" << "(" << j_1__ << ")";
-                    stan::lang::rethrow_located(std::runtime_error(std::string("Error initializing variable phi: ") + msg__.str()), current_statement_begin__, prog_reader__());
-                }
-            }
-            current_statement_begin__ = 3520;
-            size_t phi_seasonal_j_1_max__ = P_ar;
-            for (size_t j_1__ = 0; j_1__ < phi_seasonal_j_1_max__; ++j_1__) {
-                if (stan::math::is_uninitialized(phi_seasonal(j_1__))) {
-                    std::stringstream msg__;
-                    msg__ << "Undefined transformed parameter: phi_seasonal" << "(" << j_1__ << ")";
-                    stan::lang::rethrow_located(std::runtime_error(std::string("Error initializing variable phi_seasonal: ") + msg__.str()), current_statement_begin__, prog_reader__());
-                }
-            }
-            current_statement_begin__ = 3522;
-            size_t theta_j_1_max__ = q_ma;
-            for (size_t j_1__ = 0; j_1__ < theta_j_1_max__; ++j_1__) {
-                if (stan::math::is_uninitialized(theta(j_1__))) {
-                    std::stringstream msg__;
-                    msg__ << "Undefined transformed parameter: theta" << "(" << j_1__ << ")";
-                    stan::lang::rethrow_located(std::runtime_error(std::string("Error initializing variable theta: ") + msg__.str()), current_statement_begin__, prog_reader__());
-                }
-            }
-            current_statement_begin__ = 3524;
-            size_t theta_seasonal_j_1_max__ = Q_ma;
-            for (size_t j_1__ = 0; j_1__ < theta_seasonal_j_1_max__; ++j_1__) {
-                if (stan::math::is_uninitialized(theta_seasonal(j_1__))) {
-                    std::stringstream msg__;
-                    msg__ << "Undefined transformed parameter: theta_seasonal" << "(" << j_1__ << ")";
-                    stan::lang::rethrow_located(std::runtime_error(std::string("Error initializing variable theta_seasonal: ") + msg__.str()), current_statement_begin__, prog_reader__());
-                }
-            }
             // model body
-            current_statement_begin__ = 3599;
+            current_statement_begin__ = 3690;
             if (as_bool(logical_eq(horizon, 0))) {
-                current_statement_begin__ = 3600;
+                current_statement_begin__ = 3691;
                 lp_accum__.add(ssm_constant_lpdf(y, d, Z, H, c, T, R, Q, a1, P1, pstream__));
             } else {
-                current_statement_begin__ = 3602;
+                current_statement_begin__ = 3693;
                 lp_accum__.add(ssm_constant_forecast_lpdf(y, d, Z, H, c, T, R, Q, a1, P1, horizon, pstream__));
             }
         } catch (const std::exception& e) {
@@ -6798,19 +6993,16 @@ public:
         names__.push_back("unconstrained_theta");
         names__.push_back("unconstrained_theta_seasonal");
         names__.push_back("var_zeta");
-        names__.push_back("c");
-        names__.push_back("d");
-        names__.push_back("Q");
-        names__.push_back("T");
-        names__.push_back("R");
-        names__.push_back("a1");
-        names__.push_back("P1");
-        names__.push_back("dummy_phi");
-        names__.push_back("dummy_theta");
         names__.push_back("phi");
         names__.push_back("phi_seasonal");
         names__.push_back("theta");
         names__.push_back("theta_seasonal");
+        names__.push_back("c");
+        names__.push_back("T");
+        names__.push_back("R");
+        names__.push_back("Q");
+        names__.push_back("a1");
+        names__.push_back("P1");
     }
     void get_dims(std::vector<std::vector<size_t> >& dimss__) const {
         dimss__.resize(0);
@@ -6833,37 +7025,6 @@ public:
         dims__.resize(0);
         dimss__.push_back(dims__);
         dims__.resize(0);
-        dims__.push_back(m);
-        dimss__.push_back(dims__);
-        dims__.resize(0);
-        dims__.push_back(p);
-        dimss__.push_back(dims__);
-        dims__.resize(0);
-        dims__.push_back(1);
-        dims__.push_back(1);
-        dimss__.push_back(dims__);
-        dims__.resize(0);
-        dims__.push_back(m);
-        dims__.push_back(m);
-        dimss__.push_back(dims__);
-        dims__.resize(0);
-        dims__.push_back(m);
-        dims__.push_back(1);
-        dimss__.push_back(dims__);
-        dims__.resize(0);
-        dims__.push_back(m);
-        dimss__.push_back(dims__);
-        dims__.resize(0);
-        dims__.push_back(m);
-        dims__.push_back(m);
-        dimss__.push_back(dims__);
-        dims__.resize(0);
-        dims__.push_back(r);
-        dimss__.push_back(dims__);
-        dims__.resize(0);
-        dims__.push_back((r - 1));
-        dimss__.push_back(dims__);
-        dims__.resize(0);
         dims__.push_back(p_ar);
         dimss__.push_back(dims__);
         dims__.resize(0);
@@ -6874,6 +7035,28 @@ public:
         dimss__.push_back(dims__);
         dims__.resize(0);
         dims__.push_back(Q_ma);
+        dimss__.push_back(dims__);
+        dims__.resize(0);
+        dims__.push_back(m);
+        dimss__.push_back(dims__);
+        dims__.resize(0);
+        dims__.push_back(m);
+        dims__.push_back(m);
+        dimss__.push_back(dims__);
+        dims__.resize(0);
+        dims__.push_back(m);
+        dims__.push_back(1);
+        dimss__.push_back(dims__);
+        dims__.resize(0);
+        dims__.push_back(1);
+        dims__.push_back(1);
+        dimss__.push_back(dims__);
+        dims__.resize(0);
+        dims__.push_back(m);
+        dimss__.push_back(dims__);
+        dims__.resize(0);
+        dims__.push_back(m);
+        dims__.push_back(m);
         dimss__.push_back(dims__);
     }
     template <typename RNG>
@@ -6925,232 +7108,102 @@ public:
         if (!include_tparams__ && !include_gqs__) return;
         try {
             // declare and define transformed parameters
-            current_statement_begin__ = 3493;
-            validate_non_negative_index("c", "m", m);
-            Eigen::Matrix<double, Eigen::Dynamic, 1> c(m);
-            stan::math::initialize(c, DUMMY_VAR__);
-            stan::math::fill(c, DUMMY_VAR__);
-            current_statement_begin__ = 3496;
-            validate_non_negative_index("d", "p", p);
-            Eigen::Matrix<double, Eigen::Dynamic, 1> d(p);
-            stan::math::initialize(d, DUMMY_VAR__);
-            stan::math::fill(d, DUMMY_VAR__);
-            stan::math::assign(d,rep_vector(0, p));
-            current_statement_begin__ = 3499;
-            validate_non_negative_index("Q", "1", 1);
-            validate_non_negative_index("Q", "1", 1);
-            Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> Q(1, 1);
-            stan::math::initialize(Q, DUMMY_VAR__);
-            stan::math::fill(Q, DUMMY_VAR__);
-            stan::math::assign(Q,stan::math::to_matrix(stan::math::array_builder<Eigen::Matrix<local_scalar_t__, 1, Eigen::Dynamic> >().add(stan::math::to_row_vector(stan::math::array_builder<local_scalar_t__ >().add(var_zeta).array())).array()));
-            current_statement_begin__ = 3502;
-            validate_non_negative_index("T", "m", m);
-            validate_non_negative_index("T", "m", m);
-            Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> T(m, m);
-            stan::math::initialize(T, DUMMY_VAR__);
-            stan::math::fill(T, DUMMY_VAR__);
-            current_statement_begin__ = 3503;
-            validate_non_negative_index("R", "m", m);
-            validate_non_negative_index("R", "1", 1);
-            Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> R(m, 1);
-            stan::math::initialize(R, DUMMY_VAR__);
-            stan::math::fill(R, DUMMY_VAR__);
-            current_statement_begin__ = 3506;
-            validate_non_negative_index("a1", "m", m);
-            Eigen::Matrix<double, Eigen::Dynamic, 1> a1(m);
-            stan::math::initialize(a1, DUMMY_VAR__);
-            stan::math::fill(a1, DUMMY_VAR__);
-            current_statement_begin__ = 3509;
-            validate_non_negative_index("P1", "m", m);
-            validate_non_negative_index("P1", "m", m);
-            Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> P1(m, m);
-            stan::math::initialize(P1, DUMMY_VAR__);
-            stan::math::fill(P1, DUMMY_VAR__);
-            current_statement_begin__ = 3512;
-            validate_non_negative_index("dummy_phi", "r", r);
-            Eigen::Matrix<double, Eigen::Dynamic, 1> dummy_phi(r);
-            stan::math::initialize(dummy_phi, DUMMY_VAR__);
-            stan::math::fill(dummy_phi, DUMMY_VAR__);
-            stan::math::assign(dummy_phi,rep_vector(0, r));
-            current_statement_begin__ = 3515;
-            validate_non_negative_index("dummy_theta", "(r - 1)", (r - 1));
-            Eigen::Matrix<double, Eigen::Dynamic, 1> dummy_theta((r - 1));
-            stan::math::initialize(dummy_theta, DUMMY_VAR__);
-            stan::math::fill(dummy_theta, DUMMY_VAR__);
-            stan::math::assign(dummy_theta,rep_vector(0, (r - 1)));
-            current_statement_begin__ = 3518;
+            current_statement_begin__ = 3642;
             validate_non_negative_index("phi", "p_ar", p_ar);
             Eigen::Matrix<double, Eigen::Dynamic, 1> phi(p_ar);
             stan::math::initialize(phi, DUMMY_VAR__);
             stan::math::fill(phi, DUMMY_VAR__);
-            current_statement_begin__ = 3520;
+            current_statement_begin__ = 3643;
             validate_non_negative_index("phi_seasonal", "P_ar", P_ar);
             Eigen::Matrix<double, Eigen::Dynamic, 1> phi_seasonal(P_ar);
             stan::math::initialize(phi_seasonal, DUMMY_VAR__);
             stan::math::fill(phi_seasonal, DUMMY_VAR__);
-            current_statement_begin__ = 3522;
+            current_statement_begin__ = 3645;
             validate_non_negative_index("theta", "q_ma", q_ma);
             Eigen::Matrix<double, Eigen::Dynamic, 1> theta(q_ma);
             stan::math::initialize(theta, DUMMY_VAR__);
             stan::math::fill(theta, DUMMY_VAR__);
             stan::math::assign(theta,constrain_stationary(unconstrained_theta, pstream__));
-            current_statement_begin__ = 3524;
+            current_statement_begin__ = 3646;
             validate_non_negative_index("theta_seasonal", "Q_ma", Q_ma);
             Eigen::Matrix<double, Eigen::Dynamic, 1> theta_seasonal(Q_ma);
             stan::math::initialize(theta_seasonal, DUMMY_VAR__);
             stan::math::fill(theta_seasonal, DUMMY_VAR__);
             stan::math::assign(theta_seasonal,constrain_stationary(unconstrained_theta_seasonal, pstream__));
+            current_statement_begin__ = 3649;
+            validate_non_negative_index("c", "m", m);
+            Eigen::Matrix<double, Eigen::Dynamic, 1> c(m);
+            stan::math::initialize(c, DUMMY_VAR__);
+            stan::math::fill(c, DUMMY_VAR__);
+            current_statement_begin__ = 3650;
+            validate_non_negative_index("T", "m", m);
+            validate_non_negative_index("T", "m", m);
+            Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> T(m, m);
+            stan::math::initialize(T, DUMMY_VAR__);
+            stan::math::fill(T, DUMMY_VAR__);
+            current_statement_begin__ = 3651;
+            validate_non_negative_index("R", "m", m);
+            validate_non_negative_index("R", "1", 1);
+            Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> R(m, 1);
+            stan::math::initialize(R, DUMMY_VAR__);
+            stan::math::fill(R, DUMMY_VAR__);
+            current_statement_begin__ = 3652;
+            validate_non_negative_index("Q", "1", 1);
+            validate_non_negative_index("Q", "1", 1);
+            Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> Q(1, 1);
+            stan::math::initialize(Q, DUMMY_VAR__);
+            stan::math::fill(Q, DUMMY_VAR__);
+            current_statement_begin__ = 3653;
+            validate_non_negative_index("a1", "m", m);
+            Eigen::Matrix<double, Eigen::Dynamic, 1> a1(m);
+            stan::math::initialize(a1, DUMMY_VAR__);
+            stan::math::fill(a1, DUMMY_VAR__);
+            current_statement_begin__ = 3654;
+            validate_non_negative_index("P1", "m", m);
+            validate_non_negative_index("P1", "m", m);
+            Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> P1(m, m);
+            stan::math::initialize(P1, DUMMY_VAR__);
+            stan::math::fill(P1, DUMMY_VAR__);
             // do transformed parameters statements
-            current_statement_begin__ = 3526;
+            current_statement_begin__ = 3656;
             if (as_bool(stationary)) {
-                current_statement_begin__ = 3527;
+                current_statement_begin__ = 3657;
                 stan::math::assign(phi, constrain_stationary(unconstrained_phi, pstream__));
-                current_statement_begin__ = 3528;
+                current_statement_begin__ = 3658;
                 stan::math::assign(phi_seasonal, constrain_stationary(unconstrained_phi_seasonal, pstream__));
             } else {
-                current_statement_begin__ = 3531;
+                current_statement_begin__ = 3660;
                 stan::math::assign(phi, unconstrained_phi);
-                current_statement_begin__ = 3532;
+                current_statement_begin__ = 3661;
                 stan::math::assign(phi_seasonal, unconstrained_phi_seasonal);
             }
-            current_statement_begin__ = 3536;
-            if (as_bool(logical_gt(p_ar, 0))) {
-                current_statement_begin__ = 3537;
-                stan::model::assign(dummy_phi, 
-                            stan::model::cons_list(stan::model::index_min_max(1, p_ar), stan::model::nil_index_list()), 
-                            phi, 
-                            "assigning variable dummy_phi");
+            {
+            current_statement_begin__ = 3666;
+            validate_non_negative_index("state_matrices", "p", p);
+            validate_non_negative_index("state_matrices", "(((((1 + m) + 1) + 1) + 1) + m)", (((((1 + m) + 1) + 1) + 1) + m));
+            Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, Eigen::Dynamic> state_matrices(p, (((((1 + m) + 1) + 1) + 1) + m));
+            stan::math::initialize(state_matrices, DUMMY_VAR__);
+            stan::math::fill(state_matrices, DUMMY_VAR__);
+            stan::math::assign(state_matrices,sarima_build_state_matrices(p_ar, q_ma, P_ar, Q_ma, ts_frequency, include_intercept, stationary, phi_0, unconstrained_phi, unconstrained_phi_seasonal, unconstrained_theta, unconstrained_theta_seasonal, var_zeta, pstream__));
+            current_statement_begin__ = 3672;
+            stan::math::assign(c, stan::model::rvalue(state_matrices, stan::model::cons_list(stan::model::index_omni(), stan::model::cons_list(stan::model::index_uni(1), stan::model::nil_index_list())), "state_matrices"));
+            current_statement_begin__ = 3675;
+            stan::math::assign(T, stan::model::rvalue(state_matrices, stan::model::cons_list(stan::model::index_omni(), stan::model::cons_list(stan::model::index_min_max((1 + 1), (1 + m)), stan::model::nil_index_list())), "state_matrices"));
+            current_statement_begin__ = 3676;
+            stan::math::assign(R, stan::model::rvalue(state_matrices, stan::model::cons_list(stan::model::index_omni(), stan::model::cons_list(stan::model::index_min_max(((1 + m) + 1), ((1 + m) + 1)), stan::model::nil_index_list())), "state_matrices"));
+            current_statement_begin__ = 3679;
+            stan::math::assign(Q, stan::model::rvalue(state_matrices, stan::model::cons_list(stan::model::index_omni(), stan::model::cons_list(stan::model::index_min_max((((1 + m) + 1) + 1), (((1 + m) + 1) + 1)), stan::model::nil_index_list())), "state_matrices"));
+            current_statement_begin__ = 3682;
+            stan::math::assign(a1, stan::model::rvalue(state_matrices, stan::model::cons_list(stan::model::index_omni(), stan::model::cons_list(stan::model::index_uni(((((1 + m) + 1) + 1) + 1)), stan::model::nil_index_list())), "state_matrices"));
+            current_statement_begin__ = 3685;
+            stan::math::assign(P1, stan::model::rvalue(state_matrices, stan::model::cons_list(stan::model::index_omni(), stan::model::cons_list(stan::model::index_min_max((((((1 + m) + 1) + 1) + 1) + 1), (((((1 + m) + 1) + 1) + 1) + m)), stan::model::nil_index_list())), "state_matrices"));
             }
-            current_statement_begin__ = 3540;
-            if (as_bool(logical_gt(P_ar, 0))) {
-                current_statement_begin__ = 3541;
-                for (int i = 1; i <= P_ar; ++i) {
-                    current_statement_begin__ = 3542;
-                    stan::model::assign(dummy_phi, 
-                                stan::model::cons_list(stan::model::index_uni((i * ts_frequency)), stan::model::nil_index_list()), 
-                                get_base1(phi_seasonal, i, "phi_seasonal", 1), 
-                                "assigning variable dummy_phi");
-                }
-            }
-            current_statement_begin__ = 3546;
-            if (as_bool((primitive_value(logical_gt(p_ar, 0)) && primitive_value(logical_gt(P_ar, 0))))) {
-                current_statement_begin__ = 3547;
-                for (int i = 1; i <= p_ar; ++i) {
-                    current_statement_begin__ = 3548;
-                    for (int j = 1; j <= P_ar; ++j) {
-                        current_statement_begin__ = 3549;
-                        stan::model::assign(dummy_phi, 
-                                    stan::model::cons_list(stan::model::index_uni((i + (j * ts_frequency))), stan::model::nil_index_list()), 
-                                    (-(get_base1(phi, i, "phi", 1)) * get_base1(phi_seasonal, j, "phi_seasonal", 1)), 
-                                    "assigning variable dummy_phi");
-                    }
-                }
-            }
-            current_statement_begin__ = 3556;
-            if (as_bool(logical_gt(q_ma, 0))) {
-                current_statement_begin__ = 3557;
-                stan::model::assign(dummy_theta, 
-                            stan::model::cons_list(stan::model::index_min_max(1, q_ma), stan::model::nil_index_list()), 
-                            theta, 
-                            "assigning variable dummy_theta");
-            }
-            current_statement_begin__ = 3560;
-            if (as_bool(logical_gt(Q_ma, 0))) {
-                current_statement_begin__ = 3561;
-                for (int i = 1; i <= Q_ma; ++i) {
-                    current_statement_begin__ = 3562;
-                    stan::model::assign(dummy_theta, 
-                                stan::model::cons_list(stan::model::index_uni((i * ts_frequency)), stan::model::nil_index_list()), 
-                                get_base1(theta_seasonal, i, "theta_seasonal", 1), 
-                                "assigning variable dummy_theta");
-                }
-            }
-            current_statement_begin__ = 3566;
-            if (as_bool((primitive_value(logical_gt(q_ma, 0)) && primitive_value(logical_gt(Q_ma, 0))))) {
-                current_statement_begin__ = 3567;
-                for (int i = 1; i <= q_ma; ++i) {
-                    current_statement_begin__ = 3568;
-                    for (int j = 1; j <= Q_ma; ++j) {
-                        current_statement_begin__ = 3569;
-                        stan::model::assign(dummy_theta, 
-                                    stan::model::cons_list(stan::model::index_uni((i + (j * ts_frequency))), stan::model::nil_index_list()), 
-                                    (-(get_base1(theta, i, "theta", 1)) * get_base1(theta_seasonal, j, "theta_seasonal", 1)), 
-                                    "assigning variable dummy_theta");
-                    }
-                }
-            }
-            current_statement_begin__ = 3576;
-            stan::math::assign(R, append_row(stan::math::to_matrix(stan::math::array_builder<Eigen::Matrix<double, 1, Eigen::Dynamic> >().add(stan::math::to_row_vector(stan::math::array_builder<double >().add(1).array())).array()), to_matrix(dummy_theta)));
-            current_statement_begin__ = 3579;
-            stan::math::assign(T, append_col(dummy_phi, append_row(diag_matrix(rep_vector(1, (m - 1))), to_matrix(rep_row_vector(0, (m - 1))))));
-            current_statement_begin__ = 3584;
-            stan::math::assign(P1, multiply(var_zeta, stationary_cov(T, quad_form_sym(Q, transpose(R)), pstream__)));
-            current_statement_begin__ = 3587;
-            if (as_bool(include_intercept)) {
-                current_statement_begin__ = 3588;
-                stan::math::assign(c, append_row(phi_0, rep_vector(0, (m - 1))));
-            } else {
-                current_statement_begin__ = 3590;
-                stan::math::assign(c, rep_vector(0, m));
-            }
-            current_statement_begin__ = 3594;
-            stan::math::assign(a1, ssm_update_predicted_a(c, T, a0, pstream__));
-            current_statement_begin__ = 3595;
-            stan::math::assign(P1, ssm_update_predicted_P(P1, T, quad_form_sym(Q, transpose(R)), pstream__));
             if (!include_gqs__ && !include_tparams__) return;
             // validate transformed parameters
             const char* function__ = "validate transformed params";
             (void) function__;  // dummy to suppress unused var warning
             // write transformed parameters
             if (include_tparams__) {
-                size_t c_j_1_max__ = m;
-                for (size_t j_1__ = 0; j_1__ < c_j_1_max__; ++j_1__) {
-                    vars__.push_back(c(j_1__));
-                }
-                size_t d_j_1_max__ = p;
-                for (size_t j_1__ = 0; j_1__ < d_j_1_max__; ++j_1__) {
-                    vars__.push_back(d(j_1__));
-                }
-                size_t Q_j_2_max__ = 1;
-                size_t Q_j_1_max__ = 1;
-                for (size_t j_2__ = 0; j_2__ < Q_j_2_max__; ++j_2__) {
-                    for (size_t j_1__ = 0; j_1__ < Q_j_1_max__; ++j_1__) {
-                        vars__.push_back(Q(j_1__, j_2__));
-                    }
-                }
-                size_t T_j_2_max__ = m;
-                size_t T_j_1_max__ = m;
-                for (size_t j_2__ = 0; j_2__ < T_j_2_max__; ++j_2__) {
-                    for (size_t j_1__ = 0; j_1__ < T_j_1_max__; ++j_1__) {
-                        vars__.push_back(T(j_1__, j_2__));
-                    }
-                }
-                size_t R_j_2_max__ = 1;
-                size_t R_j_1_max__ = m;
-                for (size_t j_2__ = 0; j_2__ < R_j_2_max__; ++j_2__) {
-                    for (size_t j_1__ = 0; j_1__ < R_j_1_max__; ++j_1__) {
-                        vars__.push_back(R(j_1__, j_2__));
-                    }
-                }
-                size_t a1_j_1_max__ = m;
-                for (size_t j_1__ = 0; j_1__ < a1_j_1_max__; ++j_1__) {
-                    vars__.push_back(a1(j_1__));
-                }
-                size_t P1_j_2_max__ = m;
-                size_t P1_j_1_max__ = m;
-                for (size_t j_2__ = 0; j_2__ < P1_j_2_max__; ++j_2__) {
-                    for (size_t j_1__ = 0; j_1__ < P1_j_1_max__; ++j_1__) {
-                        vars__.push_back(P1(j_1__, j_2__));
-                    }
-                }
-                size_t dummy_phi_j_1_max__ = r;
-                for (size_t j_1__ = 0; j_1__ < dummy_phi_j_1_max__; ++j_1__) {
-                    vars__.push_back(dummy_phi(j_1__));
-                }
-                size_t dummy_theta_j_1_max__ = (r - 1);
-                for (size_t j_1__ = 0; j_1__ < dummy_theta_j_1_max__; ++j_1__) {
-                    vars__.push_back(dummy_theta(j_1__));
-                }
                 size_t phi_j_1_max__ = p_ar;
                 for (size_t j_1__ = 0; j_1__ < phi_j_1_max__; ++j_1__) {
                     vars__.push_back(phi(j_1__));
@@ -7166,6 +7219,42 @@ public:
                 size_t theta_seasonal_j_1_max__ = Q_ma;
                 for (size_t j_1__ = 0; j_1__ < theta_seasonal_j_1_max__; ++j_1__) {
                     vars__.push_back(theta_seasonal(j_1__));
+                }
+                size_t c_j_1_max__ = m;
+                for (size_t j_1__ = 0; j_1__ < c_j_1_max__; ++j_1__) {
+                    vars__.push_back(c(j_1__));
+                }
+                size_t T_j_2_max__ = m;
+                size_t T_j_1_max__ = m;
+                for (size_t j_2__ = 0; j_2__ < T_j_2_max__; ++j_2__) {
+                    for (size_t j_1__ = 0; j_1__ < T_j_1_max__; ++j_1__) {
+                        vars__.push_back(T(j_1__, j_2__));
+                    }
+                }
+                size_t R_j_2_max__ = 1;
+                size_t R_j_1_max__ = m;
+                for (size_t j_2__ = 0; j_2__ < R_j_2_max__; ++j_2__) {
+                    for (size_t j_1__ = 0; j_1__ < R_j_1_max__; ++j_1__) {
+                        vars__.push_back(R(j_1__, j_2__));
+                    }
+                }
+                size_t Q_j_2_max__ = 1;
+                size_t Q_j_1_max__ = 1;
+                for (size_t j_2__ = 0; j_2__ < Q_j_2_max__; ++j_2__) {
+                    for (size_t j_1__ = 0; j_1__ < Q_j_1_max__; ++j_1__) {
+                        vars__.push_back(Q(j_1__, j_2__));
+                    }
+                }
+                size_t a1_j_1_max__ = m;
+                for (size_t j_1__ = 0; j_1__ < a1_j_1_max__; ++j_1__) {
+                    vars__.push_back(a1(j_1__));
+                }
+                size_t P1_j_2_max__ = m;
+                size_t P1_j_1_max__ = m;
+                for (size_t j_2__ = 0; j_2__ < P1_j_2_max__; ++j_2__) {
+                    for (size_t j_1__ = 0; j_1__ < P1_j_1_max__; ++j_1__) {
+                        vars__.push_back(P1(j_1__, j_2__));
+                    }
                 }
             }
             if (!include_gqs__) return;
@@ -7234,72 +7323,6 @@ public:
         param_names__.push_back(param_name_stream__.str());
         if (!include_gqs__ && !include_tparams__) return;
         if (include_tparams__) {
-            size_t c_j_1_max__ = m;
-            for (size_t j_1__ = 0; j_1__ < c_j_1_max__; ++j_1__) {
-                param_name_stream__.str(std::string());
-                param_name_stream__ << "c" << '.' << j_1__ + 1;
-                param_names__.push_back(param_name_stream__.str());
-            }
-            size_t d_j_1_max__ = p;
-            for (size_t j_1__ = 0; j_1__ < d_j_1_max__; ++j_1__) {
-                param_name_stream__.str(std::string());
-                param_name_stream__ << "d" << '.' << j_1__ + 1;
-                param_names__.push_back(param_name_stream__.str());
-            }
-            size_t Q_j_2_max__ = 1;
-            size_t Q_j_1_max__ = 1;
-            for (size_t j_2__ = 0; j_2__ < Q_j_2_max__; ++j_2__) {
-                for (size_t j_1__ = 0; j_1__ < Q_j_1_max__; ++j_1__) {
-                    param_name_stream__.str(std::string());
-                    param_name_stream__ << "Q" << '.' << j_1__ + 1 << '.' << j_2__ + 1;
-                    param_names__.push_back(param_name_stream__.str());
-                }
-            }
-            size_t T_j_2_max__ = m;
-            size_t T_j_1_max__ = m;
-            for (size_t j_2__ = 0; j_2__ < T_j_2_max__; ++j_2__) {
-                for (size_t j_1__ = 0; j_1__ < T_j_1_max__; ++j_1__) {
-                    param_name_stream__.str(std::string());
-                    param_name_stream__ << "T" << '.' << j_1__ + 1 << '.' << j_2__ + 1;
-                    param_names__.push_back(param_name_stream__.str());
-                }
-            }
-            size_t R_j_2_max__ = 1;
-            size_t R_j_1_max__ = m;
-            for (size_t j_2__ = 0; j_2__ < R_j_2_max__; ++j_2__) {
-                for (size_t j_1__ = 0; j_1__ < R_j_1_max__; ++j_1__) {
-                    param_name_stream__.str(std::string());
-                    param_name_stream__ << "R" << '.' << j_1__ + 1 << '.' << j_2__ + 1;
-                    param_names__.push_back(param_name_stream__.str());
-                }
-            }
-            size_t a1_j_1_max__ = m;
-            for (size_t j_1__ = 0; j_1__ < a1_j_1_max__; ++j_1__) {
-                param_name_stream__.str(std::string());
-                param_name_stream__ << "a1" << '.' << j_1__ + 1;
-                param_names__.push_back(param_name_stream__.str());
-            }
-            size_t P1_j_2_max__ = m;
-            size_t P1_j_1_max__ = m;
-            for (size_t j_2__ = 0; j_2__ < P1_j_2_max__; ++j_2__) {
-                for (size_t j_1__ = 0; j_1__ < P1_j_1_max__; ++j_1__) {
-                    param_name_stream__.str(std::string());
-                    param_name_stream__ << "P1" << '.' << j_1__ + 1 << '.' << j_2__ + 1;
-                    param_names__.push_back(param_name_stream__.str());
-                }
-            }
-            size_t dummy_phi_j_1_max__ = r;
-            for (size_t j_1__ = 0; j_1__ < dummy_phi_j_1_max__; ++j_1__) {
-                param_name_stream__.str(std::string());
-                param_name_stream__ << "dummy_phi" << '.' << j_1__ + 1;
-                param_names__.push_back(param_name_stream__.str());
-            }
-            size_t dummy_theta_j_1_max__ = (r - 1);
-            for (size_t j_1__ = 0; j_1__ < dummy_theta_j_1_max__; ++j_1__) {
-                param_name_stream__.str(std::string());
-                param_name_stream__ << "dummy_theta" << '.' << j_1__ + 1;
-                param_names__.push_back(param_name_stream__.str());
-            }
             size_t phi_j_1_max__ = p_ar;
             for (size_t j_1__ = 0; j_1__ < phi_j_1_max__; ++j_1__) {
                 param_name_stream__.str(std::string());
@@ -7323,6 +7346,54 @@ public:
                 param_name_stream__.str(std::string());
                 param_name_stream__ << "theta_seasonal" << '.' << j_1__ + 1;
                 param_names__.push_back(param_name_stream__.str());
+            }
+            size_t c_j_1_max__ = m;
+            for (size_t j_1__ = 0; j_1__ < c_j_1_max__; ++j_1__) {
+                param_name_stream__.str(std::string());
+                param_name_stream__ << "c" << '.' << j_1__ + 1;
+                param_names__.push_back(param_name_stream__.str());
+            }
+            size_t T_j_2_max__ = m;
+            size_t T_j_1_max__ = m;
+            for (size_t j_2__ = 0; j_2__ < T_j_2_max__; ++j_2__) {
+                for (size_t j_1__ = 0; j_1__ < T_j_1_max__; ++j_1__) {
+                    param_name_stream__.str(std::string());
+                    param_name_stream__ << "T" << '.' << j_1__ + 1 << '.' << j_2__ + 1;
+                    param_names__.push_back(param_name_stream__.str());
+                }
+            }
+            size_t R_j_2_max__ = 1;
+            size_t R_j_1_max__ = m;
+            for (size_t j_2__ = 0; j_2__ < R_j_2_max__; ++j_2__) {
+                for (size_t j_1__ = 0; j_1__ < R_j_1_max__; ++j_1__) {
+                    param_name_stream__.str(std::string());
+                    param_name_stream__ << "R" << '.' << j_1__ + 1 << '.' << j_2__ + 1;
+                    param_names__.push_back(param_name_stream__.str());
+                }
+            }
+            size_t Q_j_2_max__ = 1;
+            size_t Q_j_1_max__ = 1;
+            for (size_t j_2__ = 0; j_2__ < Q_j_2_max__; ++j_2__) {
+                for (size_t j_1__ = 0; j_1__ < Q_j_1_max__; ++j_1__) {
+                    param_name_stream__.str(std::string());
+                    param_name_stream__ << "Q" << '.' << j_1__ + 1 << '.' << j_2__ + 1;
+                    param_names__.push_back(param_name_stream__.str());
+                }
+            }
+            size_t a1_j_1_max__ = m;
+            for (size_t j_1__ = 0; j_1__ < a1_j_1_max__; ++j_1__) {
+                param_name_stream__.str(std::string());
+                param_name_stream__ << "a1" << '.' << j_1__ + 1;
+                param_names__.push_back(param_name_stream__.str());
+            }
+            size_t P1_j_2_max__ = m;
+            size_t P1_j_1_max__ = m;
+            for (size_t j_2__ = 0; j_2__ < P1_j_2_max__; ++j_2__) {
+                for (size_t j_1__ = 0; j_1__ < P1_j_1_max__; ++j_1__) {
+                    param_name_stream__.str(std::string());
+                    param_name_stream__ << "P1" << '.' << j_1__ + 1 << '.' << j_2__ + 1;
+                    param_names__.push_back(param_name_stream__.str());
+                }
             }
         }
         if (!include_gqs__) return;
@@ -7366,72 +7437,6 @@ public:
         param_names__.push_back(param_name_stream__.str());
         if (!include_gqs__ && !include_tparams__) return;
         if (include_tparams__) {
-            size_t c_j_1_max__ = m;
-            for (size_t j_1__ = 0; j_1__ < c_j_1_max__; ++j_1__) {
-                param_name_stream__.str(std::string());
-                param_name_stream__ << "c" << '.' << j_1__ + 1;
-                param_names__.push_back(param_name_stream__.str());
-            }
-            size_t d_j_1_max__ = p;
-            for (size_t j_1__ = 0; j_1__ < d_j_1_max__; ++j_1__) {
-                param_name_stream__.str(std::string());
-                param_name_stream__ << "d" << '.' << j_1__ + 1;
-                param_names__.push_back(param_name_stream__.str());
-            }
-            size_t Q_j_2_max__ = 1;
-            size_t Q_j_1_max__ = 1;
-            for (size_t j_2__ = 0; j_2__ < Q_j_2_max__; ++j_2__) {
-                for (size_t j_1__ = 0; j_1__ < Q_j_1_max__; ++j_1__) {
-                    param_name_stream__.str(std::string());
-                    param_name_stream__ << "Q" << '.' << j_1__ + 1 << '.' << j_2__ + 1;
-                    param_names__.push_back(param_name_stream__.str());
-                }
-            }
-            size_t T_j_2_max__ = m;
-            size_t T_j_1_max__ = m;
-            for (size_t j_2__ = 0; j_2__ < T_j_2_max__; ++j_2__) {
-                for (size_t j_1__ = 0; j_1__ < T_j_1_max__; ++j_1__) {
-                    param_name_stream__.str(std::string());
-                    param_name_stream__ << "T" << '.' << j_1__ + 1 << '.' << j_2__ + 1;
-                    param_names__.push_back(param_name_stream__.str());
-                }
-            }
-            size_t R_j_2_max__ = 1;
-            size_t R_j_1_max__ = m;
-            for (size_t j_2__ = 0; j_2__ < R_j_2_max__; ++j_2__) {
-                for (size_t j_1__ = 0; j_1__ < R_j_1_max__; ++j_1__) {
-                    param_name_stream__.str(std::string());
-                    param_name_stream__ << "R" << '.' << j_1__ + 1 << '.' << j_2__ + 1;
-                    param_names__.push_back(param_name_stream__.str());
-                }
-            }
-            size_t a1_j_1_max__ = m;
-            for (size_t j_1__ = 0; j_1__ < a1_j_1_max__; ++j_1__) {
-                param_name_stream__.str(std::string());
-                param_name_stream__ << "a1" << '.' << j_1__ + 1;
-                param_names__.push_back(param_name_stream__.str());
-            }
-            size_t P1_j_2_max__ = m;
-            size_t P1_j_1_max__ = m;
-            for (size_t j_2__ = 0; j_2__ < P1_j_2_max__; ++j_2__) {
-                for (size_t j_1__ = 0; j_1__ < P1_j_1_max__; ++j_1__) {
-                    param_name_stream__.str(std::string());
-                    param_name_stream__ << "P1" << '.' << j_1__ + 1 << '.' << j_2__ + 1;
-                    param_names__.push_back(param_name_stream__.str());
-                }
-            }
-            size_t dummy_phi_j_1_max__ = r;
-            for (size_t j_1__ = 0; j_1__ < dummy_phi_j_1_max__; ++j_1__) {
-                param_name_stream__.str(std::string());
-                param_name_stream__ << "dummy_phi" << '.' << j_1__ + 1;
-                param_names__.push_back(param_name_stream__.str());
-            }
-            size_t dummy_theta_j_1_max__ = (r - 1);
-            for (size_t j_1__ = 0; j_1__ < dummy_theta_j_1_max__; ++j_1__) {
-                param_name_stream__.str(std::string());
-                param_name_stream__ << "dummy_theta" << '.' << j_1__ + 1;
-                param_names__.push_back(param_name_stream__.str());
-            }
             size_t phi_j_1_max__ = p_ar;
             for (size_t j_1__ = 0; j_1__ < phi_j_1_max__; ++j_1__) {
                 param_name_stream__.str(std::string());
@@ -7455,6 +7460,54 @@ public:
                 param_name_stream__.str(std::string());
                 param_name_stream__ << "theta_seasonal" << '.' << j_1__ + 1;
                 param_names__.push_back(param_name_stream__.str());
+            }
+            size_t c_j_1_max__ = m;
+            for (size_t j_1__ = 0; j_1__ < c_j_1_max__; ++j_1__) {
+                param_name_stream__.str(std::string());
+                param_name_stream__ << "c" << '.' << j_1__ + 1;
+                param_names__.push_back(param_name_stream__.str());
+            }
+            size_t T_j_2_max__ = m;
+            size_t T_j_1_max__ = m;
+            for (size_t j_2__ = 0; j_2__ < T_j_2_max__; ++j_2__) {
+                for (size_t j_1__ = 0; j_1__ < T_j_1_max__; ++j_1__) {
+                    param_name_stream__.str(std::string());
+                    param_name_stream__ << "T" << '.' << j_1__ + 1 << '.' << j_2__ + 1;
+                    param_names__.push_back(param_name_stream__.str());
+                }
+            }
+            size_t R_j_2_max__ = 1;
+            size_t R_j_1_max__ = m;
+            for (size_t j_2__ = 0; j_2__ < R_j_2_max__; ++j_2__) {
+                for (size_t j_1__ = 0; j_1__ < R_j_1_max__; ++j_1__) {
+                    param_name_stream__.str(std::string());
+                    param_name_stream__ << "R" << '.' << j_1__ + 1 << '.' << j_2__ + 1;
+                    param_names__.push_back(param_name_stream__.str());
+                }
+            }
+            size_t Q_j_2_max__ = 1;
+            size_t Q_j_1_max__ = 1;
+            for (size_t j_2__ = 0; j_2__ < Q_j_2_max__; ++j_2__) {
+                for (size_t j_1__ = 0; j_1__ < Q_j_1_max__; ++j_1__) {
+                    param_name_stream__.str(std::string());
+                    param_name_stream__ << "Q" << '.' << j_1__ + 1 << '.' << j_2__ + 1;
+                    param_names__.push_back(param_name_stream__.str());
+                }
+            }
+            size_t a1_j_1_max__ = m;
+            for (size_t j_1__ = 0; j_1__ < a1_j_1_max__; ++j_1__) {
+                param_name_stream__.str(std::string());
+                param_name_stream__ << "a1" << '.' << j_1__ + 1;
+                param_names__.push_back(param_name_stream__.str());
+            }
+            size_t P1_j_2_max__ = m;
+            size_t P1_j_1_max__ = m;
+            for (size_t j_2__ = 0; j_2__ < P1_j_2_max__; ++j_2__) {
+                for (size_t j_1__ = 0; j_1__ < P1_j_1_max__; ++j_1__) {
+                    param_name_stream__.str(std::string());
+                    param_name_stream__ << "P1" << '.' << j_1__ + 1 << '.' << j_2__ + 1;
+                    param_names__.push_back(param_name_stream__.str());
+                }
             }
         }
         if (!include_gqs__) return;
