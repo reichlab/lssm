@@ -889,7 +889,7 @@
   
   matrix ssm_update_F(matrix P, matrix Z, matrix H) {
     matrix[rows(H), cols(H)] F;
-    F = to_symmetric_matrix(quad_form(P, Z') + H);
+    F = to_symmetric_matrix(quad_form_sym(P, Z') + H);
     return F;
   }
   
@@ -916,8 +916,8 @@
   matrix ssm_update_Finv(matrix P, matrix Z, matrix H) {
     matrix[rows(H), cols(H)] Finv;
     // if can guarantee that F is spd, then take spd inverse.
-    Finv = inverse_spd(to_spd_matrix(quad_form(P, Z') + H));
-    // Finv = inverse(quad_form(P, Z') + H);
+    Finv = inverse(to_spd_matrix(quad_form_sym(P, Z') + H));
+    // Finv = inverse_spd(quad_form(P, Z') + H);
     return Finv;
   }
   
@@ -2003,6 +2003,8 @@
     int n;
     int m;
     int p;
+
+//    print("In ssm_constant_lpdf");
   
     n = size(y); // number of obs
     m = cols(Z);
@@ -2028,6 +2030,7 @@
       a = a1;
       P = P1;
       for (t in 1:n) {
+//        print(t);
         v = ssm_update_v(y[t], a, d, Z);
         if (converged < 1) {
           Finv = ssm_update_Finv(P, Z, H);
@@ -2051,6 +2054,9 @@
       }
       ll = sum(ll_obs);
     }
+
+//    print("Exiting ssm_constant_lpdf");
+
     return ll;
   }
   
@@ -2135,7 +2141,7 @@
   */
   matrix ssm_update_predicted_P (matrix P, matrix T, matrix RQR){
     matrix[rows(P), cols(P)] P_new;
-    P_new = to_symmetric_matrix(quad_form_sym(P,T')+RQR);
+    P_new = to_symmetric_matrix(quad_form(P,T')+RQR);
     return P_new;
   }
   

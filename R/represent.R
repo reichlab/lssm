@@ -40,6 +40,9 @@ represent_forecasts <- function(
     forecast <- named_dist_forecast
   } else if (forecast_representation == "sample") {
     fun_name <- paste0("r", named_dist_forecast$family[1])
+    if(fun_name == "rmvnorm") {
+      fun_name <- mvtnorm::rmvnorm
+    }
     family_col_ind <- which(colnames(named_dist_forecast) == "family")
     param_cols <- family_col_ind +
       seq_len(ncol(named_dist_forecast) - family_col_ind)

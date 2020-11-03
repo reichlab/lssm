@@ -39,7 +39,7 @@
   */
   matrix sarima_build_state_matrices(
     int p_ar, int q_ma, int P_ar, int Q_ma, int ts_frequency,
-    int include_intercept, int stationary,
+    int include_intercept,
     vector phi_0, vector phi, vector phi_seasonal,
     vector theta, vector theta_seasonal,
     real var_zeta) {
@@ -140,7 +140,7 @@
     result[, 1] = c;
     result[, (1 + 1):(1 + m)] = T;
     result[, (1 + m + 1):(1 + m + 1)] = R;
-    result[, (1 + m + 1 + 1):(1 + m + 1 + 1)] = Q;
+    result[1:1, (1 + m + 1 + 1):(1 + m + 1 + 1)] = Q;
     result[, (1 + m + 1 + 1 + 1)] = a1;
     result[, (1 + m + 1 + 1 + 1 + 1):(1 + m + 1 + 1 + 1 + m)] = P1;
 

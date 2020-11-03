@@ -1,5 +1,6 @@
 functions {
 #include /lib/functions.stan
+#include /lib/sarima_utils.stan
 }
 
 data {
@@ -60,102 +61,70 @@ data {
 }
 
 transformed data {
-  // Z in 3.19 of Durbin and Koopman
-  matrix[p, m] Z = append_col([[1]], to_matrix(rep_row_vector(0, m - 1)));
-  
-  // observation covariance
-  matrix[p, p] H = [[0]];
-
-  // state intercept
-  vector[m] c;
+  // observation matrices
+  matrix[p, 1 + m + p] observation_matrices =
+    sarima_build_observation_matrices(m);
   
   // observation intercept
-  vector[p] d = rep_vector(0, p);
+  vector[p] d = observation_matrices[, 1];
   
-  // below are transformed parameters from model
+  // state to observation mean
+  matrix[p, m] Z = observation_matrices[, (1 + 1):(1 + m)];
   
-  // covariance of state noise
-  matrix[1, 1] Q = [[var_zeta]];
+  // observation covariance
+  matrix[p, p] H = observation_matrices[, (1 + m + 1):(1 + m + p)];
+
+//  // model parameters after constraining to stationary and invertible
+//  vector[p_ar] phi;
+//  vector[P_ar] phi_seasonal;
   
-  // update matrices for state
-  matrix[m, m] T;
-  matrix[m, 1] R;
+//  vector[q_ma] theta = constrain_stationary(unconstrained_theta) ;
+//  vector[Q_ma] theta_seasonal = constrain_stationary(unconstrained_theta_seasonal);
   
-  // covariance of state at times 0 and 1
-  vector[m] a0 = rep_vector(0, m);
+  // state process matrices
+  vector[m] c;
+  matrix[m,m] T;
+  matrix[m,1] R;
+  matrix[1,1] Q;
   vector[m] a1;
-  matrix[m, m] P1;
-  
-  // initialize dummy_phi to 0s
-  vector[r] dummy_phi = rep_vector(0, r);
-  
-  // initialize dummy_theta to 0s
-  vector[r-1] dummy_theta = rep_vector(0, r-1);
+  matrix[m,m] P1;
   
   // shape of result
   int result_nrow;
   int result_ncol;
   int result_length;
 
-  // set AR coefficient values
-  if (p_ar > 0) {
-    dummy_phi[1:p_ar] = phi;
-  }
+//  if (stationary) {
+//    phi = constrain_stationary(unconstrained_phi);
+//    phi_seasonal = constrain_stationary(unconstrained_phi_seasonal);
+//  } else {
+//    phi = unconstrained_phi;
+//    phi_seasonal = unconstrained_phi_seasonal;
+//  }
+
+  // state matrices
+  {
+    matrix[m, 1 + m + 1 + 1 + 1 + m] state_matrices = sarima_build_state_matrices(
+      p_ar, q_ma, P_ar, Q_ma, ts_frequency, include_intercept,
+      phi_0, phi, phi_seasonal, theta, theta_seasonal, var_zeta);
+    
+    // state intercept
+    c = state_matrices[, 1];
   
-  if (P_ar > 0) {
-    for (i in 1:P_ar) {
-      dummy_phi[i*ts_frequency] = phi_seasonal[i];
-    }
-  }
+    // update matrices for state
+    T = state_matrices[, (1 + 1):(1 + m)];
+    R = state_matrices[, (1 + m + 1):(1 + m + 1)];
+    
+    // covariance of state noise
+    Q = state_matrices[1:1, (1 + m + 1 + 1):(1 + m + 1 + 1)];
   
-  if (p_ar > 0 && P_ar > 0) {
-    for (i in 1:p_ar) {
-      for (j in 1: P_ar) {
-        dummy_phi[i+ j*ts_frequency] = -phi[i]* phi_seasonal[j];
-      }
-    }
+    // expected value of state at time 1
+    a1 = state_matrices[, (1 + m + 1 + 1 + 1)];
+  
+    // covariance of state at time 1
+    P1 = state_matrices[, (1 + m + 1 + 1 + 1 + 1):(1 + m + 1 + 1 + 1 + m)];
   }
 
-  // set MA coefficient values
-  if (q_ma > 0) {
-    dummy_theta[1:q_ma] = theta;
-  }
-  
-  if (Q_ma > 0) {
-    for (i in 1:Q_ma) {
-      dummy_theta[i*ts_frequency] = theta_seasonal[i];
-    }
-  }
-  
-  if (q_ma > 0 && Q_ma > 0) {
-    for (i in 1:q_ma) {
-      for (j in 1: Q_ma) {
-        dummy_theta[i+ j*ts_frequency] = -theta[i]* theta_seasonal[j];
-      }
-    }
-  }
-
-  // state covariance R in 3.20 of Durbin and Koopman
-  R = append_row([[1]], to_matrix(dummy_theta));
-  
-  // T in 3.20 of Durbin and Koopman
-  T = append_col(dummy_phi,
-  append_row(
-    diag_matrix(rep_vector(1, m-1)), to_matrix(rep_row_vector(0, m-1))));
-  
-  // variance for the initial state
-  P1 = var_zeta * stationary_cov(T, quad_form_sym(Q, R'));
-  
-  if (include_intercept) {
-    c = append_row(phi_0, rep_vector(0, m - 1));
-  } else{
-    c = rep_vector(0, m);
-  }
-
-  // expected value and covariance of forecast distribution for state at time 1
-  a1 = ssm_update_predicted_a(c, T, a0);
-  P1 = ssm_update_predicted_P(P1, T, quad_form_sym(Q, R'));
-  
   // shape of result
   if(joint == 0) {
     // marginal distribution parameters separately per horizon

@@ -54,10 +54,14 @@ dbcmvnorm <- function(
   lambda = 0,
   offset = 0,
   log) {
+  # convert to matrix if necessary
   if (is.vector(x)) {
     x <- matrix(x, ncol = length(x))
   }
   p <- ncol(x)
+
+   # car::bcPower wants a separate lambda per column of x; we repeat the same value
+  lambda <- rep(lambda, ncol(x))
   
   bc_x <- do_initial_transform(
     y = x,
@@ -65,7 +69,7 @@ dbcmvnorm <- function(
     transform_offset = offset,
     bc_lambda = lambda)
   log_x <- log(x + offset)
-  
+
   log_result <- mvtnorm::dmvnorm(
     bc_x,
     mean = mean,
@@ -73,7 +77,7 @@ dbcmvnorm <- function(
     log = TRUE) +
     (lambda - 1) * apply(log_x, 1, sum)
   
-  if(log) {
+  if (log) {
     return(log_result)
   } else {
     return(exp(log_result))

@@ -83,8 +83,10 @@ transformed parameters{
   vector[p_ar] phi;
   vector[P_ar] phi_seasonal;
   
-  vector[q_ma] theta = constrain_stationary(unconstrained_theta) ;
-  vector[Q_ma] theta_seasonal = constrain_stationary(unconstrained_theta_seasonal);
+//  vector[q_ma] theta = constrain_stationary(unconstrained_theta) ;
+//  vector[Q_ma] theta_seasonal = constrain_stationary(unconstrained_theta_seasonal);
+  vector[q_ma] theta = unconstrained_theta;
+  vector[Q_ma] theta_seasonal = unconstrained_theta_seasonal;
   
   // state process matrices
   vector[m] c;
@@ -101,13 +103,23 @@ transformed parameters{
     phi = unconstrained_phi;
     phi_seasonal = unconstrained_phi_seasonal;
   }
+//  print("modified function");
+//  print("Stationary = ");
+//  print(stationary);
+//  print("phi = ");
+//  print(phi);
+//  print("phi_seasonal = ");
+//  print(phi_seasonal);
+//  print("theta = ");
+//  print(theta);
+//  print("theta_seasonal = ");
+//  print(theta_seasonal);
 
   // state matrices
   {
-    matrix[p, 1 + m + 1 + 1 + 1 + m] state_matrices = sarima_build_state_matrices(
-      p_ar, q_ma, P_ar, Q_ma, ts_frequency, include_intercept, stationary,
-      phi_0, unconstrained_phi, unconstrained_phi_seasonal,
-      unconstrained_theta, unconstrained_theta_seasonal, var_zeta);
+    matrix[m, 1 + m + 1 + 1 + 1 + m] state_matrices = sarima_build_state_matrices(
+      p_ar, q_ma, P_ar, Q_ma, ts_frequency, include_intercept,
+      phi_0, phi, phi_seasonal, theta, theta_seasonal, var_zeta);
     
     // state intercept
     c = state_matrices[, 1];
@@ -117,7 +129,7 @@ transformed parameters{
     R = state_matrices[, (1 + m + 1):(1 + m + 1)];
     
     // covariance of state noise
-    Q = state_matrices[, (1 + m + 1 + 1):(1 + m + 1 + 1)];
+    Q = state_matrices[1:1, (1 + m + 1 + 1):(1 + m + 1 + 1)];
   
     // expected value of state at time 1
     a1 = state_matrices[, (1 + m + 1 + 1 + 1)];
@@ -129,6 +141,11 @@ transformed parameters{
 
 model {
   if(horizon == 0) {
+    real temp;
+//    print("calculating log likelihood...");
+    temp = ssm_constant_lpdf(y | d, Z, H, c, T, R, Q, a1, P1);
+//    print("log likelihood = ");
+//    print(temp);
     target += ssm_constant_lpdf(y | d, Z, H, c, T, R, Q, a1, P1);
   } else {
     target += ssm_constant_forecast_lpdf(y | d, Z, H, c, T, R, Q, a1, P1, horizon);

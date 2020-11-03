@@ -183,6 +183,9 @@ crossvalidate_lssm <- function(
       
       # log score for validation set predictions
       dfun <- paste0("d", named_dist_forecast$family[[1]])
+      if(dfun == "dmvnorm") {
+        dfun <- mvtnorm::dmvnorm
+      }
       arg_names <- names(named_dist_forecast)[
         !(names(named_dist_forecast) %in% c("family", "h"))]
       call_args <- purrr::map(
@@ -191,9 +194,10 @@ crossvalidate_lssm <- function(
           named_dist_forecast[[pan]][[1]]
         }
       )
+      names(call_args) <- arg_names
       call_args$mean <- call_args$mean[crossval_horizon_inds]
       call_args$sigma <- call_args$sigma[
-        crossval_horizon_inds, crossval_horizon_inds]
+        crossval_horizon_inds, crossval_horizon_inds, drop = FALSE]
       call_args$x <- y[crossval_folds$test[[fold_ind]]]
       call_args$log <- TRUE
       
