@@ -37,8 +37,6 @@ sarima_param_grid <- function(
   max_order = 5,
   stationary = 1L
 ) {
-  library(lssm)
-  
   # Only do seasonal differencing if y has a seasonal period
   if(frequency(y) < 2) {
     max_D <- 0

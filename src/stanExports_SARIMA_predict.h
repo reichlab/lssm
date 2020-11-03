@@ -3443,11 +3443,6 @@ ssm_constant_lpdf(const std::vector<Eigen::Matrix<T0__, Eigen::Dynamic, 1> >& y,
         int p(0);
         (void) p;  // dummy to suppress unused var warning
         stan::math::fill(p, std::numeric_limits<int>::min());
-        current_statement_begin__ = 2008;
-        if (pstream__) {
-            stan_print(pstream__,"In ssm_constant_lpdf");
-            *pstream__ << std::endl;
-        }
         current_statement_begin__ = 2010;
         stan::math::assign(n, size(y));
         current_statement_begin__ = 2011;
@@ -3526,11 +3521,6 @@ ssm_constant_lpdf(const std::vector<Eigen::Matrix<T0__, Eigen::Dynamic, 1> >& y,
         stan::math::assign(P, P1);
         current_statement_begin__ = 2033;
         for (int t = 1; t <= n; ++t) {
-            current_statement_begin__ = 2034;
-            if (pstream__) {
-                stan_print(pstream__,t);
-                *pstream__ << std::endl;
-            }
             current_statement_begin__ = 2035;
             stan::math::assign(v, ssm_update_v(get_base1(y, t, "y", 1), a, d, Z, pstream__));
             current_statement_begin__ = 2036;
@@ -3567,11 +3557,6 @@ ssm_constant_lpdf(const std::vector<Eigen::Matrix<T0__, Eigen::Dynamic, 1> >& y,
         }
         current_statement_begin__ = 2056;
         stan::math::assign(ll, sum(ll_obs));
-        }
-        current_statement_begin__ = 2059;
-        if (pstream__) {
-            stan_print(pstream__,"Exiting ssm_constant_lpdf");
-            *pstream__ << std::endl;
         }
         current_statement_begin__ = 2061;
         return stan::math::promote_scalar<fun_return_scalar_t__>(ll);
@@ -6358,8 +6343,8 @@ sarima_build_state_matrices(const int& p_ar,
                     "assigning variable result");
         current_statement_begin__ = 3563;
         stan::model::assign(result, 
-                    stan::model::cons_list(stan::model::index_min_max(1, 1), stan::model::cons_list(stan::model::index_min_max((((1 + m) + 1) + 1), (((1 + m) + 1) + 1)), stan::model::nil_index_list())), 
-                    Q, 
+                    stan::model::cons_list(stan::model::index_uni(1), stan::model::cons_list(stan::model::index_uni((((1 + m) + 1) + 1)), stan::model::nil_index_list())), 
+                    get_base1(Q, 1, 1, "Q", 1), 
                     "assigning variable result");
         current_statement_begin__ = 3564;
         stan::model::assign(result, 
