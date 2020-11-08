@@ -150,6 +150,9 @@ crossvalidate_lssm <- function(
     # later fits will use parameter estimates from the previous fit.
     init_par <- NULL
     
+    # boolean to record whether there was an error thrown during estimation
+    estimation_error <- FALSE
+
     # Iterate through folds and obtain log score for each.
     for (fold_ind in seq_along(crossval_folds$train)) {
       if (verbose) {
@@ -167,7 +170,19 @@ crossvalidate_lssm <- function(
         param$init_par <- init_par
       }
       
-      model_fit <- do.call(fit_lssm, param)
+      tryCatch(
+        error = function(e) {
+          estimation_error <- TRUE
+        },
+        model_fit <- do.call(fit_lssm, param)
+      )
+
+      if (estimation_error) {
+        # stop trying to fit this model
+        model_results$log_score[
+          seq(from = fold_ind, to = length(crossval_folds$train))] <- -Inf
+        break
+      }
       
       # save parameter estimates to use as initial values for estimation with
       # next fold
@@ -199,7 +214,19 @@ crossvalidate_lssm <- function(
       call_args$x <- y[crossval_folds$test[[fold_ind]]]
       call_args$log <- TRUE
       
-      model_results$log_score[fold_ind] <- mean(do.call(dfun, call_args))
+      tryCatch(
+        error = function(e) {
+          estimation_error <- TRUE
+        },
+        model_results$log_score[fold_ind] <- mean(do.call(dfun, call_args))
+      )
+
+      if (estimation_error) {
+        # stop trying to fit this model
+        model_results$log_score[
+          seq(from = fold_ind, to = length(crossval_folds$train))] <- -Inf
+        break
+      }
       
       toc <- Sys.time()
       model_results$run_time[fold_ind] <- toc - tic
